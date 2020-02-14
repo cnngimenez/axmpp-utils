@@ -87,8 +87,10 @@ begin
 
     Send_To := S2Us (Argument (1));
     Text := S2us (Argument (2));
+    H.Set_Text (Text);
+    H.Set_To_JID (Send_To);
 
-    XMPP.Logger.Enable_Debug;
+    --  XMPP.Logger.Enable_Debug;
     XMPP.Sessions.Initialize;
 
     S.Set_Stream_Handler (H);

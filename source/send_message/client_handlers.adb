@@ -198,13 +198,16 @@ package body Client_Handlers is
 
          --  After session successfully established,
          --  sending presence
-         Self.Set_Presence;
+         --  Self.Set_Presence;
          
          Put_Line ("Sending Message...");
          Message.Set_Type (XMPP.Chat);
          Message.Set_Body (Self.Text);
          Message.Set_To (Self.To_JID);
          Message.Set_From (Self.Config.JID);
+         Put_Line (Self.Text.To_Wide_Wide_String);
+         Put_Line (Self.To_JID.To_Wide_Wide_String);
+         Put_Line (Self.Config.JID.To_Wide_Wide_String);
          
          Self.Object.Send_Object (Message);
       end if;
