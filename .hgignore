@@ -4,3 +4,5 @@ syntax: regexp
 \.objs/.*
 bin/.*
 lib/.*
+config/.*
+tests/.*
