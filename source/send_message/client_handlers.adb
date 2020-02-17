@@ -45,8 +45,8 @@ use Ada.Wide_Wide_Text_IO;
 
 with Client;
 
-with XMPP.IQS;
-pragma Warnings (Off, XMPP.IQS);
+--  with XMPP.IQS;
+--  pragma Warnings (Off, XMPP.IQS);
 --  XXX : Gnat gpl 2010 bug
 
 with XMPP.Objects;
@@ -56,12 +56,9 @@ pragma Warnings (Off, XMPP.Objects);
 with XMPP.Rosters;
 use XMPP.Rosters;
 with XMPP.Roster_Items;
-with XMPP.Messages;
+--  with XMPP.Messages;
 with XMPP.Logger;
 use XMPP.Logger;
-
-with League.Strings;
-use League.Strings;
 
 package body Client_Handlers is
 
@@ -70,9 +67,9 @@ package body Client_Handlers is
 
    use type XMPP.Bind_State;
    use type XMPP.Session_State;
-   
-   function "+" (Item : Wide_Wide_String) return Universal_String
-     renames League.Strings.To_Universal_String;
+
+   --  function "+" (Item : Wide_Wide_String) return Universal_String
+   --    renames League.Strings.To_Universal_String;
 
    procedure Put_Roster (Iq : XMPP_Roster);
 
@@ -104,18 +101,20 @@ package body Client_Handlers is
    begin
       Ada.Wide_Wide_Text_IO.Put_Line ("Yeah, we are connected");
    end Connected;
-   
+
    overriding procedure Disconnected
      (Self : in out Client_Handler) is
+       pragma Unreferenced (Self);
        use Ada.Task_Identification;
    begin
        Put_Line ("Disconnected");
        --  Exit from the current task.
        Abort_Task (Current_Task);
    end Disconnected;
-   
+
    overriding procedure End_Stream
      (Self : in out Client_Handler) is
+       pragma Unreferenced (Self);
        use Ada.Task_Identification;
    begin
        Put_Line ("Stream ended");
@@ -123,15 +122,16 @@ package body Client_Handlers is
        Abort_Task (Current_Task);
    end End_Stream;
 
-   
    overriding procedure Error
      (Self : in out Client_Handler) is
+       pragma Unreferenced (Self);
    begin
        Put_Line ("Error!");
    end Error;
 
    overriding procedure IQ (Self : in out Client_Handler;
                             IQ   : XMPP.IQS.XMPP_IQ'Class) is
+       pragma Unreferenced (Self);
        use XMPP;
    begin
        Put_Line ("IQ received");
@@ -150,6 +150,8 @@ package body Client_Handlers is
    overriding procedure Message
      (Self : in out Client_Handler;
       Msg : XMPP.Messages.XMPP_Message'Class) is
+       pragma Unreferenced (Self);
+       pragma Unreferenced (Msg);
    begin
        Put_Line ("Message received");
    end Message;
@@ -169,12 +171,11 @@ package body Client_Handlers is
            & Data.Get_From.To_Wide_Wide_String
            & " is "
            & XMPP.Show_Kind'Wide_Wide_Image (Data.Get_Show)
-           & "(" & Data.Get_Status.To_Wide_Wide_String & ")");
+           & " (" & Data.Get_Status.To_Wide_Wide_String & ")");
    end Presence;
 
    procedure Put_Roster (Iq : XMPP_Roster) is
        use XMPP.Roster_Items;
-       use League.Strings;
 
        Amount : constant Natural := Iq.Items_Count - 1;
        Roster_Item : XMPP_Roster_Item_Access;
@@ -198,6 +199,7 @@ package body Client_Handlers is
    overriding procedure Roster
      (Self : in out Client_Handler;
       Data : XMPP.Rosters.XMPP_Roster'Class) is
+       pragma Unreferenced (Self);
    begin
        Put_Line ("Client.Roster (handler):");
        Put_Roster (XMPP_Roster (Data));
@@ -209,7 +211,7 @@ package body Client_Handlers is
    overriding procedure Session_State
      (Self   : in out Client_Handler;
       Status : XMPP.Session_State) is
-       
+
        Message : XMPP.Messages.XMPP_Message;
    begin
        Put_Line ("Session_state:");
@@ -219,7 +221,7 @@ package body Client_Handlers is
          --  After session successfully established,
          --  sending presence
          --  Self.Set_Presence;
-         
+
          Put_Line ("Sending Message...");
          Message.Set_Type (XMPP.Chat);
          Message.Set_Body (Self.Text);
@@ -228,13 +230,13 @@ package body Client_Handlers is
          --  Put_Line (Self.Text.To_Wide_Wide_String);
          --  Put_Line (Self.To_JID.To_Wide_Wide_String);
          --  Put_Line (Self.Config.JID.To_Wide_Wide_String);
-         
+
          Self.Object.Send_Object (Message);
-         
+
          Self.Object.Close;
       end if;
    end Session_State;
-   
+
    procedure Set_Config (Self : in out Client_Handler;
                          Config : Config_Type) is
    begin
@@ -247,8 +249,7 @@ package body Client_Handlers is
    procedure Set_Presence (Self : in out Client_Handler) is
       P : XMPP.Presences.XMPP_Presence;
       use XMPP;
-      use League.Strings;
-      
+
       Complete_JID : Universal_String;
    begin
        Complete_JID := Self.Config.JID;
@@ -274,19 +275,18 @@ package body Client_Handlers is
        Put_Line ("Setting session object");
        Self.Object := Object;
    end Set_Session_Object;
-   
+
    procedure Set_Text (Self : in out Client_Handler;
                        Text : Universal_String) is
    begin
        Self.Text := Text;
    end Set_Text;
-   
+
    procedure Set_To_JID (Self : in out Client_Handler;
                          To_JID : Universal_String) is
    begin
        Self.To_JID := To_JID;
    end Set_To_JID;
-
 
    --------------------
    --  Start_Stream  --

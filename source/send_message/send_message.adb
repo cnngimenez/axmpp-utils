@@ -6,7 +6,7 @@
 --                                                                           --
 ------------------------------------------------------------------------------
 --                                                                           --
---  Copyright © 2011, Alexander Basov <coopht@gmail.com>                     --
+--  Copyright © 2011, Alexander Basov <coopht@gmail.com>                    --
 --  All rights reserved.                                                     --
 --                                                                           --
 --  Redistribution and use in source and binary forms, with or without       --
@@ -58,6 +58,8 @@ with Configs;
 
 procedure Send_Message is
 
+    function S2Us (S : String) return Universal_String;
+
     function S2Us (S : String) return Universal_String is
     begin
         return To_Universal_String
@@ -68,7 +70,7 @@ procedure Send_Message is
     S : constant not null Client.Session_Access := new Client.Session;
     H : constant not null Client_Handlers.Client_Handler_Access
       := new Client_Handlers.Client_Handler;
-    
+
     Send_To : Universal_String;
     Text : Universal_String;
 begin
@@ -79,14 +81,14 @@ begin
         Put_Line ("Send a message to the given JID");
         return;
     end if;
-    
+
     Put_Line ("Loading config.");
     Config.Load ("config/connection.cfg");
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
     Send_To := S2Us (Argument (1));
-    Text := S2us (Argument (2));
+    Text := S2Us (Argument (2));
     H.Set_Text (Text);
     H.Set_To_JID (Send_To);
 

@@ -21,28 +21,28 @@
 
 with Ada.Characters.Conversions;
 use Ada.Characters.Conversions;
-with Ada.Wide_Wide_Text_Io;
-use Ada.Wide_Wide_Text_Io;
+with Ada.Wide_Wide_Text_IO;
+use Ada.Wide_Wide_Text_IO;
 with Ada.Command_Line;
 use Ada.Command_Line;
 
 with XMPP.PLAIN_Auth;
 use XMPP.PLAIN_Auth;
-with Xmpp.Logger;
+with XMPP.Logger;
 
-procedure Plain_Password is    
-begin 
+procedure Plain_Password is
+begin
     if Argument_Count < 2 then
-        Put_Line ("Synopsis:");
+        Put_Line ("Synopsis :");
         Put_Line ("    plain_password USERNAME PASSWORD");
         New_Line;
         Put_Line ("Create a Base64 convertion for the PLAIN "
                     & "authentication method");
         return;
     end if;
-    Xmpp.Logger.Enable_Debug;
+    XMPP.Logger.Enable_Debug;
 
-    Put_Line (Plain_Password 
+    Put_Line (Plain_Password
                 (To_Wide_Wide_String (Argument (1)),
                  To_Wide_Wide_String (Argument (2))));
 end Plain_Password;

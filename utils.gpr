@@ -19,7 +19,7 @@ Project Utils is
                );
   
   package Compiler is
-      --  for Default_Switches ("Ada") use AXMPP_Config.Default_Switches;
+      for Default_Switches ("Ada") use AXMPP_Config.Default_Switches;
   end Compiler;
     
 end Utils;

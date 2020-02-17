@@ -72,13 +72,13 @@ package Client_Handlers is
      (Self   : in out Client_Handler;
       Object : XMPP.Stream_Features.XMPP_Stream_Feature'Class);
    --  We whant to handle connected event.
-   
+
    overriding procedure Disconnected
      (Self : in out Client_Handler);
-   
+
    overriding procedure End_Stream
      (Self : in out Client_Handler);
-   
+
    overriding procedure Start_Stream
      (Self   : in out Client_Handler;
       Object : XMPP.Streams.XMPP_Stream'Class);
@@ -127,23 +127,23 @@ package Client_Handlers is
 
    procedure Set_Presence (Self : in out Client_Handler);
    --  Declaring function to set presence.
-   
+
    procedure Set_Config (Self : in out Client_Handler;
                          Config : Config_Type);
-   
+
    procedure Set_Text (Self : in out Client_Handler;
                        Text : Universal_String);
-   
+
    procedure Set_To_JID (Self : in out Client_Handler;
                          To_JID : Universal_String);
-   
+
 private
 
    type Client_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
      with
    record
      Object : access Client.Session;
-     
+
      Text : Universal_String;
      To_JID : Universal_String;
      Config : Config_Type;

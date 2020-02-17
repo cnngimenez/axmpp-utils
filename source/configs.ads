@@ -32,7 +32,7 @@ package Configs is
         Resource_Name : Universal_String;
     end record;
 
-    procedure Load (Config : in out Config_Type; 
+    procedure Load (Config : in out Config_Type;
                     Filepath : String);
 
 end Configs;

@@ -47,19 +47,20 @@ with XMPP.Logger;
 with Ada.Text_IO;
 use Ada.Text_IO;
 
-with League.Strings;
+--  with League.Strings;
 
 with Configs;
 use Configs;
 
 procedure Echo_Bot is
-    
-    S : constant not null Echo_Client.Session_Access := new Echo_Client.Session;
+
+    S : constant not null Echo_Client.Session_Access
+      := new Echo_Client.Session;
     H : constant not null Echo_Handlers.Echo_Handler_Access
       := new Echo_Handlers.Echo_Handler;
-    
+
     Config : Config_Type;
-    
+
 begin
     Config.Load ("config/connection.cfg");
     H.Set_Config (Config);

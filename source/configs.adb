@@ -28,13 +28,9 @@ use Ada.Text_IO;
 
 package body Configs is
 
-    function S2Us (S : String) return Universal_String is
-    begin
-        return To_Universal_String
-          (To_Wide_Wide_String (S));
-    end S2Us;
+    function S2Us (S : String) return Universal_String;
 
-    procedure Load (Config : in out Config_Type; 
+    procedure Load (Config : in out Config_Type;
                     Filepath : String) is
         File : File_Type;
     begin
@@ -47,7 +43,7 @@ package body Configs is
         Config.Resource_Name := S2Us (Get_Line (File));
 
         Close (File);
-        
+
     exception
        when E : Name_Error =>
            Put_Line ("Name error (possible no file founded)");
@@ -58,9 +54,15 @@ package body Configs is
              (Ada.Task_Identification.Current_Task);
        when E : others =>
            Put_Line (Ada.Exceptions.Exception_Information (E));
-           
+
            Ada.Task_Identification.Abort_Task
              (Ada.Task_Identification.Current_Task);
     end Load;
+
+    function S2Us (S : String) return Universal_String is
+    begin
+        return To_Universal_String
+          (To_Wide_Wide_String (S));
+    end S2Us;
 
 end Configs;

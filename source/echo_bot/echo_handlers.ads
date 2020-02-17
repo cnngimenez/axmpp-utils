@@ -112,7 +112,7 @@ package Echo_Handlers is
 
     overriding procedure Error
       (Self : in out Echo_Handler);
-    
+
     procedure Set_Config (Self : in out Echo_Handler;
                           Config : Config_Type);
 
@@ -123,10 +123,10 @@ package Echo_Handlers is
 
     procedure Set_Presence (Self : in out Echo_Handler);
     --  Declaring function to set presence.
-    
+
     procedure Presence_Accept (Self : in out Echo_Handler;
                                Data : XMPP.Presences.XMPP_Presence'Class);
-    
+
 private
 
     type Echo_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler

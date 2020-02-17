@@ -38,6 +38,6 @@ begin
         Put_Line ("Remove the host part from a JID.");
         return;
     end if;
-    
+
     Put_Line (Remove_Host (To_Wide_Wide_String (Argument (1))));
 end Remove_Host;

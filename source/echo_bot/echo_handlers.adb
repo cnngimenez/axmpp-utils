@@ -44,8 +44,8 @@ use Ada.Wide_Wide_Text_IO;
 
 with Echo_Client;
 
-with XMPP.IQS;
-pragma Warnings (Off, XMPP.IQS);
+--  with XMPP.IQS;
+--  pragma Warnings (Off, XMPP.IQS);
 --  XXX : Gnat gpl 2010 bug
 
 with XMPP.Objects;
@@ -55,7 +55,7 @@ pragma Warnings (Off, XMPP.Objects);
 with XMPP.Rosters;
 use XMPP.Rosters;
 with XMPP.Roster_Items;
-with XMPP.Messages;
+--  with XMPP.Messages;
 with XMPP.Logger;
 use XMPP.Logger;
 
@@ -69,9 +69,9 @@ package body Echo_Handlers is
 
    use type XMPP.Bind_State;
    use type XMPP.Session_State;
-   
-   function "+" (Item : Wide_Wide_String) return Universal_String
-     renames League.Strings.To_Universal_String;
+
+   --  function "+" (Item : Wide_Wide_String) return Universal_String
+   --    renames League.Strings.To_Universal_String;
 
    procedure Put_Roster (Iq : XMPP_Roster);
 
@@ -106,12 +106,14 @@ package body Echo_Handlers is
 
    overriding procedure Error
      (Self : in out Echo_Handler) is
+       pragma Unreferenced (Self);
    begin
        Put_Line ("Error!");
    end Error;
 
    overriding procedure IQ (Self : in out Echo_Handler;
                             IQ   : XMPP.IQS.XMPP_IQ'Class) is
+       pragma Unreferenced (Self);
        use XMPP;
    begin
        Put_Line ("IQ received");
@@ -130,19 +132,19 @@ package body Echo_Handlers is
    overriding procedure Message
      (Self : in out Echo_Handler;
       Msg : XMPP.Messages.XMPP_Message'Class) is
-       
+
        Message : XMPP.Messages.XMPP_Message;
    begin
        Put_Line ("Message received");
        Put_Line (Msg.Get_From.To_Wide_Wide_String);
        Put_Line (Msg.Get_Body.To_Wide_Wide_String);
-       
+
        Message.Set_Type (XMPP.Chat);
        Message.Set_Body (Msg.Get_Body);
        Message.Set_To (Msg.Get_From);
        Message.Set_From (Self.Config.JID);
-       
-       Self.Object.Send_Object (Message);       
+
+       Self.Object.Send_Object (Message);
    end Message;
 
    ----------------
@@ -152,7 +154,7 @@ package body Echo_Handlers is
      (Self : in out Echo_Handler;
       Data : XMPP.Presences.XMPP_Presence'Class) is
        --  pragma Unreferenced (Self);
-      
+
       use XMPP;
    begin
       Ada.Wide_Wide_Text_IO.Put_Line ("Presence Arrived: ");
@@ -161,18 +163,18 @@ package body Echo_Handlers is
            & Data.Get_From.To_Wide_Wide_String
            & " is "
            & XMPP.Show_Kind'Wide_Wide_Image (Data.Get_Show)
-           & "(" & Data.Get_Status.To_Wide_Wide_String & ")");
-      
+           & " (" & Data.Get_Status.To_Wide_Wide_String & ")");
+
       if Data.Get_Type = XMPP.Subscribe then
           Put_Line ("Suscription arrived from:");
           Put_Line (Data.Get_From.To_Wide_Wide_String);
-          
+
           Put_Line ("Accepting subscription.");
           --  Accepting request
           Presence_Accept (Self, Data);
       end if;
    end Presence;
-   
+
    procedure Presence_Accept (Self : in out Echo_Handler;
                               Data : XMPP.Presences.XMPP_Presence'Class) is
        Presence : XMPP.Presences.XMPP_Presence;
@@ -184,10 +186,9 @@ package body Echo_Handlers is
 
        Self.Object.Send_Object (Presence);
    end Presence_Accept;
-   
+
    procedure Put_Roster (Iq : XMPP_Roster) is
        use XMPP.Roster_Items;
-       use League.Strings;
 
        Amount : constant Natural := Iq.Items_Count - 1;
        Roster_Item : XMPP_Roster_Item_Access;
@@ -195,7 +196,7 @@ package body Echo_Handlers is
        Log ("Echo_Client.Handlers.Put_Roster:");
        Put ("Roster received. Items amount: ");
        Put_Line (Natural'Wide_Wide_Image (Amount + 1));
-       Put_Line ("-- Roster item list:");
+       Put_Line ("--  Roster item list:");
        for I in 0 .. Amount loop
            Roster_Item := Iq.Item_At (I);
 
@@ -204,13 +205,14 @@ package body Echo_Handlers is
            Put_Line (To_Wide_Wide_String
                        (Roster_Item.Get_JID));
        end loop;
-       Put_Line ("-- End roster items");
+       Put_Line ("--  End roster items");
 
    end Put_Roster;
 
    overriding procedure Roster
      (Self : in out Echo_Handler;
       Data : XMPP.Rosters.XMPP_Roster'Class) is
+       pragma Unreferenced (Self);
    begin
        Put_Line ("Echo_Client.Roster (handler):");
        Put_Roster (XMPP_Roster (Data));
@@ -248,7 +250,6 @@ package body Echo_Handlers is
    procedure Set_Presence (Self : in out Echo_Handler) is
       P : XMPP.Presences.XMPP_Presence;
       use XMPP;
-      use League.Strings;
    begin
        Put_Line ("Setting presence as online");
 
