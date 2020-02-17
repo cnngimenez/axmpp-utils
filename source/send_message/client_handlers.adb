@@ -39,6 +39,7 @@
 ------------------------------------------------------------------------------
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
+with Ada.Task_Identification;
 with Ada.Wide_Wide_Text_IO;
 use Ada.Wide_Wide_Text_IO;
 
@@ -103,7 +104,26 @@ package body Client_Handlers is
    begin
       Ada.Wide_Wide_Text_IO.Put_Line ("Yeah, we are connected");
    end Connected;
+   
+   overriding procedure Disconnected
+     (Self : in out Client_Handler) is
+       use Ada.Task_Identification;
+   begin
+       Put_Line ("Disconnected");
+       --  Exit from the current task.
+       Abort_Task (Current_Task);
+   end Disconnected;
+   
+   overriding procedure End_Stream
+     (Self : in out Client_Handler) is
+       use Ada.Task_Identification;
+   begin
+       Put_Line ("Stream ended");
+       --  Exit from the current task.
+       Abort_Task (Current_Task);
+   end End_Stream;
 
+   
    overriding procedure Error
      (Self : in out Client_Handler) is
    begin
@@ -205,11 +225,13 @@ package body Client_Handlers is
          Message.Set_Body (Self.Text);
          Message.Set_To (Self.To_JID);
          Message.Set_From (Self.Config.JID);
-         Put_Line (Self.Text.To_Wide_Wide_String);
-         Put_Line (Self.To_JID.To_Wide_Wide_String);
-         Put_Line (Self.Config.JID.To_Wide_Wide_String);
+         --  Put_Line (Self.Text.To_Wide_Wide_String);
+         --  Put_Line (Self.To_JID.To_Wide_Wide_String);
+         --  Put_Line (Self.Config.JID.To_Wide_Wide_String);
          
          Self.Object.Send_Object (Message);
+         
+         Self.Object.Close;
       end if;
    end Session_State;
    

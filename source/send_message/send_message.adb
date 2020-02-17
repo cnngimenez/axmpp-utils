@@ -90,7 +90,7 @@ begin
     H.Set_Text (Text);
     H.Set_To_JID (Send_To);
 
-    --  XMPP.Logger.Enable_Debug;
+    XMPP.Logger.Enable_Debug;
     XMPP.Sessions.Initialize;
 
     S.Set_Stream_Handler (H);

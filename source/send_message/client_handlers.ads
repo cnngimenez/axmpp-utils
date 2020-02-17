@@ -72,7 +72,13 @@ package Client_Handlers is
      (Self   : in out Client_Handler;
       Object : XMPP.Stream_Features.XMPP_Stream_Feature'Class);
    --  We whant to handle connected event.
-
+   
+   overriding procedure Disconnected
+     (Self : in out Client_Handler);
+   
+   overriding procedure End_Stream
+     (Self : in out Client_Handler);
+   
    overriding procedure Start_Stream
      (Self   : in out Client_Handler;
       Object : XMPP.Streams.XMPP_Stream'Class);
