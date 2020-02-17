@@ -5,7 +5,7 @@ with "axmpp_config";
 Project Utils is
   
   for Source_Dirs use ("source", 
-                       "source/con_cli",
+                       "source/echo_bot",
                        "source/send_message"
                       );
   for Object_Dir use ".objs";
@@ -14,7 +14,7 @@ Project Utils is
   for Main use (
                 "plain_password.adb",
                 "remove_host.adb",
-                "main.adb",
+                "echo_bot.adb",
                 "send_message.adb"
                );
   
