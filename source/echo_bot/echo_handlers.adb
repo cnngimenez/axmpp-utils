@@ -151,8 +151,9 @@ package body Echo_Handlers is
    overriding procedure Presence
      (Self : in out Echo_Handler;
       Data : XMPP.Presences.XMPP_Presence'Class) is
-      pragma Unreferenced (Self);
-
+       --  pragma Unreferenced (Self);
+      
+      use XMPP;
    begin
       Ada.Wide_Wide_Text_IO.Put_Line ("Presence Arrived: ");
       Ada.Wide_Wide_Text_IO.Put_Line
@@ -161,8 +162,29 @@ package body Echo_Handlers is
            & " is "
            & XMPP.Show_Kind'Wide_Wide_Image (Data.Get_Show)
            & "(" & Data.Get_Status.To_Wide_Wide_String & ")");
+      
+      if Data.Get_Type = XMPP.Subscribe then
+          Put_Line ("Suscription arrived from:");
+          Put_Line (Data.Get_From.To_Wide_Wide_String);
+          
+          Put_Line ("Accepting subscription.");
+          --  Accepting request
+          Presence_Accept (Self, Data);
+      end if;
    end Presence;
+   
+   procedure Presence_Accept (Self : in out Echo_Handler;
+                              Data : XMPP.Presences.XMPP_Presence'Class) is
+       Presence : XMPP.Presences.XMPP_Presence;
+       use XMPP;
+   begin
+       Presence.Set_Type (XMPP.Subscribed);
+       Presence.Set_To (Data.Get_From);
+       Presence.Set_From (Self.Config.JID);
 
+       Self.Object.Send_Object (Presence);
+   end Presence_Accept;
+   
    procedure Put_Roster (Iq : XMPP_Roster) is
        use XMPP.Roster_Items;
        use League.Strings;
