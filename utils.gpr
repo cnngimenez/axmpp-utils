@@ -1,12 +1,14 @@
 with "matreshka_league";
 with "axmpp";
 with "axmpp_config";
+with "utilada";
 
 Project Utils is
   
   for Source_Dirs use ("source", 
                        "source/echo_bot",
-                       "source/send_message"
+                       "source/send_message",
+                       "source/send_file"
                       );
   for Object_Dir use ".objs";
   for Exec_Dir use "bin";
@@ -15,7 +17,8 @@ Project Utils is
                 "plain_password.adb",
                 "remove_host.adb",
                 "echo_bot.adb",
-                "send_message.adb"
+                "send_message.adb",
+                "send_file.adb"
                );
   
   package Compiler is
