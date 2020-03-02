@@ -48,23 +48,23 @@ with Ada.Text_IO;
 use Ada.Text_IO;
 with Ada.Command_Line;
 use Ada.Command_Line;
-with Ada.Characters.Conversions;
-use Ada.Characters.Conversions;
+--  with Ada.Characters.Conversions;
+--  use Ada.Characters.Conversions;
 
-with League.Strings;
-use League.Strings;
+--  with League.Strings;
+--  use League.Strings;
 
 with Configs;
 
 procedure Send_File is
 
-    function S2Us (S : String) return Universal_String;
+    --  function S2Us (S : String) return Universal_String;
 
-    function S2Us (S : String) return Universal_String is
-    begin
-        return To_Universal_String
-          (To_Wide_Wide_String (S));
-    end S2Us;
+    --  function S2Us (S : String) return Universal_String is
+    --  begin
+    --      return To_Universal_String
+    --        (To_Wide_Wide_String (S));
+    --  end S2Us;
 
     Config : Configs.Config_Type;
     S : constant not null Send_File_Client.Session_Access
@@ -72,8 +72,6 @@ procedure Send_File is
     H : constant not null Send_File_Handlers.Client_Handler_Access
       := new Send_File_Handlers.Client_Handler;
 
-    Send_To : Universal_String;
-    Text : Universal_String;
 begin
     if Argument_Count < 2 then
         Put_Line ("Synopsis:");
@@ -87,11 +85,6 @@ begin
     Config.Load ("config/connection.cfg");
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
-
-    Send_To := S2Us (Argument (1));
-    Text := S2Us (Argument (2));
-    H.Set_Text (Text);
-    H.Set_To_JID (Send_To);
 
     XMPP.Logger.Enable_Debug;
     XMPP.Sessions.Initialize;

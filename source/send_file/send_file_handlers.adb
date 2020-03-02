@@ -61,6 +61,8 @@ with XMPP.IQ_Requests;
 with XMPP.Logger;
 use XMPP.Logger;
 
+with HTTP_Uploader;
+
 package body Send_File_Handlers is
 
    use XMPP.IQS;
@@ -161,13 +163,14 @@ package body Send_File_Handlers is
    overriding procedure IQ_Upload
      (Self : in out Client_Handler;
       IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class) is
-       pragma Unreferenced (Self);
+       --  pragma Unreferenced (Self);
    begin
        Put_Line ("IQ Upload handler");
        Put_Line ("Get URL:" & To_Wide_Wide_String (IQ_Upload.Get_Get_URL));
        Put_Line ("Put URL:" & To_Wide_Wide_String (IQ_Upload.Get_Put_URL));
 
-       Uploader.Upload_File (IQ_Upload.Get_Put_URL);
+       HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
+                                  Self.File_Info.Get_Filepath);
    end IQ_Upload;
 
    overriding procedure Message
@@ -269,6 +272,12 @@ package body Send_File_Handlers is
        Self.Config := Config;
    end Set_Config;
 
+   procedure Set_File_Info (Self : in out Client_Handler;
+                            File_Info : File_Information) is
+   begin
+       Self.File_Info := File_Info;
+   end Set_File_Info;
+
    --------------------
    --  Set_Presence  --
    --------------------
@@ -301,18 +310,6 @@ package body Send_File_Handlers is
        Put_Line ("Setting session object");
        Self.Object := Object;
    end Set_Session_Object;
-
-   procedure Set_Text (Self : in out Client_Handler;
-                       Text : Universal_String) is
-   begin
-       Self.Text := Text;
-   end Set_Text;
-
-   procedure Set_To_JID (Self : in out Client_Handler;
-                         To_JID : Universal_String) is
-   begin
-       Self.To_JID := To_JID;
-   end Set_To_JID;
 
    --------------------
    --  Start_Stream  --

@@ -51,6 +51,8 @@ with XMPP.Messages;
 with XMPP.Rosters;
 with XMPP.IQ_Uploads;
 
+with Files;
+use Files;
 with Configs;
 use Configs;
 
@@ -136,11 +138,8 @@ package Send_File_Handlers is
    procedure Set_Config (Self : in out Client_Handler;
                          Config : Config_Type);
 
-   procedure Set_Text (Self : in out Client_Handler;
-                       Text : Universal_String);
-
-   procedure Set_To_JID (Self : in out Client_Handler;
-                         To_JID : Universal_String);
+   procedure Set_File_Info (Self : in out Client_Handler;
+                            File_Info : File_Information);
 
 private
 
@@ -149,9 +148,8 @@ private
    record
      Object : access Send_File_Client.Session;
 
-     Text : Universal_String;
-     To_JID : Universal_String;
      Config : Config_Type;
+     File_Info : File_Information;
    end record;
 
 end Send_File_Handlers;
