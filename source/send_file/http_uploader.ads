@@ -1,4 +1,4 @@
---  uploader.ads ---
+--  http_uploader.ads ---
 
 --  Copyright 2020 cnngimenez
 --
@@ -19,10 +19,15 @@
 
 -------------------------------------------------------------------------
 
+with League.Strings;
+use League.Strings;
+
 package HTTP_Uploader is
 
     --  Upload a file using HTTP PUT.
     procedure Upload_File (Put_Url : Universal_String;
+                           Path : String);
+    procedure Upload_File (Put_Url : String;
                            Path : String);
 
 end HTTP_Uploader;

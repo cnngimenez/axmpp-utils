@@ -21,22 +21,53 @@
 
 with Util.Http.Clients;
 with Util.Http.Clients.Curl;
+with Ada.Text_IO;
+with Ada.Strings.Unbounded;
 
 package body HTTP_Uploader is
-    
-    --  Upload a file using HTTP PUT.
-    procedure Upload_File (Path : String; 
-                           Put_Url : String) is
+
+    function Get_File_Data (Path : String) return String;
+
+    function Get_File_Data (Path : String) return String is
+        use Ada.Text_IO;
+        use Ada.Strings.Unbounded;
+
+        File : File_Type;
+        Data : Unbounded_String;
+    begin
+        Open (File, In_File, Path);
+
+        while not End_Of_File (File) loop
+            declare
+                Line : constant String := Get_Line (File);
+            begin
+                Append (Data, Line);
+            end;
+        end loop;
+
+        Close (File);
+
+        return To_String (Data);
+    end Get_File_Data;
+
+    procedure Upload_File (Put_Url : Universal_String;
+                           Path : String) is
+    begin
+        null;
+    end Upload_File;
+
+    procedure Upload_File (Put_Url : String;
+                           Path : String) is
 
         Http_Client : Util.Http.Clients.Client;
         Response : Util.Http.Clients.Response;
-        
-        Data : String := Get_File_Data (Path);
+
+        Data : constant String := Get_File_Data (Path);
     begin
-        Http.Put (Put_Url, Data, Response);
+        Http_Client.Put (Put_Url, Data, Response);
     end Upload_File;
-    
+
 begin
     Util.Http.Clients.Curl.Register;
-    
+
 end HTTP_Uploader;
