@@ -19,28 +19,41 @@
 
 -------------------------------------------------------------------------
 
+with League.Strings;
+use League.Strings;
+with Ada.Strings.Unbounded;
+use Ada.Strings.Unbounded;
+with Ada.Directories;
+use Ada.Directories;
+
 package Files is
-    type File_Information is tagged record;
+    --  Store the file information.
+    type File_Information is tagged private;
 
-    function Create (Filepath : Wide_Wide_String) return File_Information;
+    --  Take the file information from the given existent file.
+    function Create (Filepath : String) return File_Information;
 
-    function Get_Filepath (Self : File_Information) return Wide_Wide_String;
+    function Get_Filepath (Self : File_Information) return Unbounded_String;
+    function Get_Filepath (Self : File_Information) return String;
     function Get_Name (Self : File_Information) return Universal_String;
     function Get_Size (Self : File_Information) return Universal_String;
     function Get_Size (Self : File_Information) return Integer;
-    function Get_Content_Type (Self : File_Information) return Universal_String;
+    function Get_Size (Self : File_Information) return File_Size;
+    procedure Set_Content_Type (Self : in out File_Information;
+                                Content_Type : Universal_String);
+    function Get_Content_Type (Self : File_Information)
+                              return Universal_String;
 
-    function Get_Base64 (Self : File_Information) return String;
-    function Get_Base64 (Filepath : String) return String;
+    --  function Get_Base64 (Self : File_Information) return String;
+    --  function Get_Base64 (Filepath : String) return String;
 
 private
 
     type File_Information is tagged record
-        Filepath : Wide_Wide_String;
+        Filepath : Unbounded_String;
         Name : Universal_String;
-        Size : Integer;
+        Size : File_Size;
         Content_Type : Universal_String;
     end record;
 
 end Files;
-
