@@ -1,7 +1,7 @@
 with "matreshka_league";
 with "axmpp";
 with "axmpp_config";
-with "utilada";
+with "utilada_http";
 
 Project Utils is
   
