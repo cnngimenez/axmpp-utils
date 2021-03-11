@@ -3,7 +3,7 @@ with "axmpp";
 with "axmpp_config";
 with "utilada_http";
 
-Project Utils is
+Project Axmpp_Utils is
   
   for Source_Dirs use ("source", 
                        "source/echo_bot",
@@ -25,4 +25,4 @@ Project Utils is
       for Default_Switches ("Ada") use AXMPP_Config.Default_Switches;
   end Compiler;
     
-end Utils;
+end Axmpp_Utils;
