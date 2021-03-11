@@ -5,6 +5,7 @@ Requisites:
 
 - [AXMPP library](https://github.com/cnngimenez/axmpp) ([see original fork](https://github.com/coopht/axmpp))
 - [Matreshka libraries](http://forge.ada-ru.org/matreshka/)
+- [Ada Utils](https://github.com/stcarrez/ada-util/) (required for the HTTP Upload when sharing files)
 - GNAT compiler.
 - GPRBuild.
 
