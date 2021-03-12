@@ -50,6 +50,7 @@ with Ada.Command_Line;
 use Ada.Command_Line;
 with Ada.Characters.Conversions;
 use Ada.Characters.Conversions;
+with Ada.Environment_Variables;
 
 with League.Strings;
 use League.Strings;
@@ -65,7 +66,8 @@ procedure Send_Message is
         return To_Universal_String
           (To_Wide_Wide_String (S));
     end S2Us;
-
+    
+    Home_Path : String := Ada.Environment_Variables.Value ("HOME");
     Config : Configs.Config_Type;
     S : constant not null Client.Session_Access := new Client.Session;
     H : constant not null Client_Handlers.Client_Handler_Access
@@ -83,7 +85,7 @@ begin
     end if;
 
     Put_Line ("Loading config.");
-    Config.Load ("config/connection.cfg");
+    Config.Load (Home_Path & "/.config/axmpp-utils/connection.cfg");
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
