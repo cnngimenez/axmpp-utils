@@ -7,7 +7,8 @@ Project Axmpp_Utils is
   for Source_Dirs use ("source", 
                        "source/echo_bot",
                        "source/send_message",
-                       "source/send_file"
+                       "source/send_file",
+                       "source/event_bot"
                       );
   for Object_Dir use ".objs";
   for Exec_Dir use "bin";
@@ -17,7 +18,8 @@ Project Axmpp_Utils is
                 "remove_host.adb",
                 "echo_bot.adb",
                 "send_message.adb",
-                "send_file.adb"
+                "send_file.adb",
+                "event_bot.adb"
                );
   
   package Compiler is
