@@ -21,13 +21,11 @@
 
 with Ada.Text_IO;
 use Ada.Text_IO;
-with Ada.Wide_Wide_Text_IO;
 with Ada.Command_Line;
 use Ada.Command_Line;
 with Ada.Characters.Conversions;
 use Ada.Characters.Conversions;
 with Ada.Environment_Variables;
-with Ada.Strings.Unbounded;
 
 with Event_Sessions;
 with Event_Handlers;
@@ -35,6 +33,8 @@ with XMPP.Sessions;
 with XMPP.Logger;
 
 with Configs;
+with Pipe_Manager;
+use Pipe_Manager;
 
 with League.Strings;
 use League.Strings;
@@ -58,25 +58,9 @@ procedure Event_Bot is
 
     Send_To : Universal_String;
 
-    File : File_Type;
     Line : Universal_String;
     Bye_Text : constant Universal_String := S2Us ("bye");
-
-    function Get_Line2 (File : File_Type) return String is
-        use Ada.Strings.Unbounded;
-        Buffer : Unbounded_String;
-        C : Character;
-    begin
-        Buffer := To_Unbounded_String ("");
-
-        loop
-            Get (File, C);
-            Append (Buffer, C);
-            exit when End_Of_File (File);
-        end loop;
-
-        return To_String (Buffer);
-    end Get_Line2;
+    Pipe : Pipe_Type;
 begin
     if Argument_Count < 1 then
         Put_Line ("Synopsis:");
@@ -112,21 +96,14 @@ begin
     Put_Line ("Opening...");
     Session.Open;
 
-    loop
-        Open (File, In_File, Argument (2));
+    Pipe.Initialize (Argument (2));
 
-        Line := S2Us (Get_Line2 (File));
-        Ada.Wide_Wide_Text_IO.Put_Line ("Event received: "
-                                          & To_Wide_Wide_String (Line));
+    loop
+        Line := Pipe.Attend_Pipe;
         Session.Send_Message (Line);
-        Put_Line ("Event sended");
 
         exit when Line = Bye_Text;
-
-        Close (File);
     end loop;
-
-
 
     Put_Line ("End");
 end Event_Bot;

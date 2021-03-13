@@ -21,18 +21,37 @@
 
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
+with Ada.Text_IO;
+use Ada.Text_IO;
+
+with League.Strings;
+use League.Strings;
 
 package Pipe_Manager is
-   
-   type Pipe_Type is tagged private;
-   
-   procedure Create (Pipe : in out Pipe_Type; Path : String);
-   function Get_Last_Message(Pipe : Pipe_Type) return Unbounded_String;
-   function Get_Path(Pipe : Pipe_Type) return Unbounded_String;
-   
+
+    type Pipe_Type is tagged private;
+
+    procedure Initialize (Pipe : in out Pipe_Type; Path : String);
+
+    function Attend_Pipe (Pipe : in out Pipe_Type) return String;
+    function Attend_Pipe (Pipe : in out Pipe_Type) return Unbounded_String;
+    function Attend_Pipe (Pipe : in out Pipe_Type) return Universal_String;
+
+    function Get_Last_Message (Pipe : Pipe_Type) return Unbounded_String;
+    function Get_Path (Pipe : Pipe_Type) return Unbounded_String;
+
+    Pipe_Creation_Error : exception;
+
 private
-   type Pipe_Type is tagged record
-      Path : Unbounded_String;
-      Last_Message : Unbounded_String;
-   end record;
+
+    type Pipe_Type is tagged record
+        Path : Unbounded_String;
+        Last_Message : Unbounded_String;
+    end record;
+
+    --  Read a message until EOF and return it.
+    function Read_Message (File : File_Type) return Unbounded_String;
+
+    function S2Us (S : String) return Universal_String;
+
 end Pipe_Manager;
