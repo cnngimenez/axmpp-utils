@@ -35,16 +35,22 @@ package body Event_Sessions is
     function Has_Ended (Self : in out Session) return Boolean is
       (Self.Ended);
 
-    procedure Send_Message (Self : in out Session; Text : Universal_String) is
+    procedure Send_Message (Self : in out Session;
+                            To : Universal_String;
+                            Text : Universal_String) is
         Message : XMPP.Messages.XMPP_Message;
     begin
-
         Message.Set_Type (XMPP.Chat);
         Message.Set_Body (Text);
-        Message.Set_To (Self.To_JID);
+        Message.Set_To (To);
         Message.Set_From (Self.Config.JID);
 
         Self.Send_Object (Message);
+    end Send_Message;
+
+    procedure Send_Message (Self : in out Session; Text : Universal_String) is
+    begin
+        Send_Message (Self, Self.To_JID, Text);
     end Send_Message;
 
     procedure Send_Message (Self : in out Session; Text : Wide_Wide_String) is

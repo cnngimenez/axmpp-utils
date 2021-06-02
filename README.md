@@ -39,3 +39,33 @@ myhost.org
 mybotpassword
 axmpp_1
 ```
+
+# event_bot Usage
+The event bot requires two files: one Linux/Unix pipe and an output file. For instance, the following shell commands start the bot with `input_pipe` and `output_file` as input and output.
+
+```sh
+mkfifo input_pipe
+touch output_file
+bin/event_bot myaccount@myhost.org ./input_pipe ./output_file
+```
+
+The `input_pipe` can receive any string to send to an XMPP client. If the message has the format `"to=AN_XMPP_JID MESSAGE"` then the message is sent to the JID provided. Else, the message is sent to myaccount@myhost.org. For example:
+
+```
+echo "to=bob@myhost.org hello Bob!" >> ./input_pipe
+echo "hello myaccount!" >> ./input_pipe
+```
+
+The first command sends the message `hello Bob!` to bob@myhost.org and the second one sends `hello myaccount!` to myaccount@myhost.org.
+
+The `output_file` is a text file with all the received chats from other XMPP clients. The message format is the following: `[DATE_IN_UTC] FULL_JID:MESSAGE`. For example:
+
+```
+[2021-06-02 12:29:53 UTC] bob@myhost.org/Conversations.12ab:Hello bot!
+[2021-06-02 12:29:55 UTC] alice@myhost.org/Gajim.ab12:Hiiiii!
+```
+
+This file can be a FIFO pipe like the `input_pipe`, however it should be consulted frequently to avoid blocking. The bot get blocked when it is trying to write into a pipe without a reading process ready to consume the data. This is an operative system characteristic when usual file reading and writing instructions are used on pipes. Using a common file would not blocked the bot in any way. In fact, the file can be written or cleared as soon as a message is received because the bot closes it when idle.
+
+# License
+This work is under the General Public License version 3.

@@ -41,7 +41,27 @@ use League.Strings;
 
 procedure Event_Bot is
 
+    function Get_Message (Line : Universal_String) return Universal_String;
+    function Get_To (Line : Universal_String) return Universal_String;
     function S2Us (S : String) return Universal_String;
+
+    function Get_Message (Line : Universal_String) return Universal_String is
+    begin
+        if Line.Starts_With ("to=") then
+            return Line.Tail_From (Index (Line, " ") + 1);
+        else
+            return Line;
+        end if;
+    end Get_Message;
+
+    function Get_To (Line : Universal_String) return Universal_String is
+    begin
+        if Line.Starts_With ("to=") then
+            return Line.Slice (4, Index (Line, " ") - 1);
+        else
+            return Empty_Universal_String;
+        end if;
+    end Get_To;
 
     function S2Us (S : String) return Universal_String is
     begin
@@ -58,7 +78,7 @@ procedure Event_Bot is
 
     Send_To : Universal_String;
 
-    Line : Universal_String;
+    To, Line : Universal_String;
     Bye_Text : constant Universal_String := S2Us ("bye");
     Output_Pipe, Input_Pipe : Pipe_Type;
 
@@ -106,7 +126,13 @@ begin
 
     while not Session.Has_Ended loop
         Line := Input_Pipe.Attend_Pipe;
-        Session.Send_Message (Line);
+
+        To := Get_To (Line);
+        if To.Is_Empty then
+            Session.Send_Message (Line);
+        else
+            Session.Send_Message (To, Get_Message (Line));
+        end if;
 
         exit when Line = Bye_Text;
     end loop;

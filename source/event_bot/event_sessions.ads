@@ -36,6 +36,9 @@ package Event_Sessions is
     type Session_Access is access all Session'Class;
     --  Define access type
 
+    procedure Send_Message (Self : in out Session;
+                            To : Universal_String;
+                            Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Wide_Wide_String);
 
