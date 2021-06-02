@@ -42,10 +42,17 @@ package Event_Sessions is
     procedure Set_To_JID (Self : in out Session; JID : Universal_String);
     procedure Set_Config (Self : in out Session; Config : Config_Type);
 
+    function Has_Ended (Self : in out Session) return Boolean;
+    --  Has the session ended gracefully?
+
+    procedure Ended (Self : in out Session);
+    --  Set the session as ended!
+    --  This is used by the Event_Handler.
 private
 
     type Session is limited new XMPP.Sessions.XMPP_Session
        with record
+           Ended : Boolean := False;
            To_JID : Universal_String;
            Config : Config_Type;
        end record;

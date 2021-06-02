@@ -104,7 +104,7 @@ begin
     Handler.Set_Output_Pipe (Output_Pipe);
     Output_Pipe.Write_Message (Startup_Pipe_Message);
 
-    loop
+    while not Session.Has_Ended loop
         Line := Input_Pipe.Attend_Pipe;
         Session.Send_Message (Line);
 

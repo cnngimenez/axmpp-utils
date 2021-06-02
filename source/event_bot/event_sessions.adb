@@ -27,6 +27,14 @@ package body Event_Sessions is
 
     use XMPP.Objects;
 
+    procedure Ended (Self : in out Session) is
+    begin
+        Self.Ended := True;
+    end Ended;
+
+    function Has_Ended (Self : in out Session) return Boolean is
+      (Self.Ended);
+
     procedure Send_Message (Self : in out Session; Text : Universal_String) is
         Message : XMPP.Messages.XMPP_Message;
     begin

@@ -94,11 +94,11 @@ package body Event_Handlers is
 
     overriding procedure End_Stream
       (Self : in out Event_Handler) is
-        pragma Unreferenced (Self);
         use Ada.Task_Identification;
     begin
         Put_Line ("Stream ended");
         --  Exit from the current task.
+        Self.Session.Ended;
         Abort_Task (Current_Task);
     end End_Stream;
 
