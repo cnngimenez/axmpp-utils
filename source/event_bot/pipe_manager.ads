@@ -65,6 +65,9 @@ private
     --  Read a message until EOF and return it.
     function Read_Message (File : File_Type) return Unbounded_String;
 
+    function Date_String return String;
+    function Date_String return Wide_Wide_String;
+
     function S2Us (S : String) return Universal_String;
 
 end Pipe_Manager;

@@ -23,6 +23,8 @@ with Ada.Directories;
 with Ada.Characters.Conversions;
 use Ada.Characters.Conversions;
 with Ada.Wide_Wide_Text_IO;
+with Ada.Calendar;
+with Ada.Calendar.Formatting;
 
 with Interfaces.C;
 
@@ -52,6 +54,17 @@ package body Pipe_Manager is
 
         return Pipe.Last_Message;
     end Attend_Pipe;
+
+    function Date_String return String is
+        use Ada.Calendar;
+        use Ada.Calendar.Formatting;
+        Now : constant Time := Clock;
+    begin
+        return "[" & Image (Now) & " UTC] ";
+    end Date_String;
+
+    function Date_String return Wide_Wide_String is
+      (To_Wide_Wide_String (Date_String));
 
     function Get_Direction (Pipe : Pipe_Type) return Direction_Type is
     begin
@@ -102,6 +115,7 @@ package body Pipe_Manager is
         File : File_Type;
     begin
         Open (File, Append_File, To_String (Pipe.Path));
+        Put (File, Date_String);
         for C of Message loop
             Put (File, C);
         end loop;
@@ -117,6 +131,7 @@ package body Pipe_Manager is
                                     Ada.Wide_Wide_Text_IO.Append_File,
                                     To_String (Pipe.Path));
 
+        Ada.Wide_Wide_Text_IO.Put (File, Date_String);
         for C of Message loop
             Ada.Wide_Wide_Text_IO.Put (File, C);
         end loop;

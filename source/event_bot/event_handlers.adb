@@ -48,8 +48,8 @@ package body Event_Handlers is
     use type XMPP.Bind_State;
     use type XMPP.Session_State;
 
-    --  function "+" (Item : Wide_Wide_String) return Universal_String
-    --    renames League.Strings.To_Universal_String;
+    function "+" (Item : Wide_Wide_String) return Universal_String
+      renames League.Strings.To_Universal_String;
 
     procedure Put_Roster (Iq : XMPP_Roster);
 
@@ -132,7 +132,7 @@ package body Event_Handlers is
        Msg : XMPP.Messages.XMPP_Message'Class) is
         --  pragma Unreferenced (Self);
         --  pragma Unreferenced (Msg);
-        Bye_Text : constant Universal_String := To_Universal_String ("Bye");
+        Bye_Text : constant Universal_String := +"Bye";
         Slash_Position : Natural;
         From : Universal_String;
     begin
@@ -149,16 +149,18 @@ package body Event_Handlers is
 
         Put_Line (To_Wide_Wide_String (From));
 
-        if From = Self.To_JID then
-            if Self.Output_Pipe_Set then
-                Self.Output_Pipe.Write_Message (Msg.Get_Body);
-                Put_Line ("Message delivered to output pipe");
-            end if;
+        if Self.Output_Pipe_Set then
+            Self.Output_Pipe.Write_Message (Msg.Get_From
+                                              & (+":")
+                                              & Msg.Get_Body);
+            Put_Line ("Message delivered to output pipe");
+        end if;
 
-            if  Msg.Get_Body = Bye_Text then
-                Self.Session.Send_Message ("Alright! Bye!");
-                Self.Session.Close;
-            end if;
+        if From = Self.To_JID and then
+          Msg.Get_Body = Bye_Text
+        then
+            Self.Session.Send_Message ("Alright! Bye!");
+            Self.Session.Close;
         end if;
     end Message;
 
