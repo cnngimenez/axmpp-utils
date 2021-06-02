@@ -30,21 +30,34 @@ use League.Strings;
 package Pipe_Manager is
 
     type Pipe_Type is tagged private;
+    type Direction_Type is (Input_Only, Output_Only);
 
-    procedure Initialize (Pipe : in out Pipe_Type; Path : String);
+    procedure Initialize (Pipe : in out Pipe_Type;
+                          Path : String;
+                          Direction : Direction_Type := Input_Only);
 
     function Attend_Pipe (Pipe : in out Pipe_Type) return String;
     function Attend_Pipe (Pipe : in out Pipe_Type) return Unbounded_String;
     function Attend_Pipe (Pipe : in out Pipe_Type) return Universal_String;
 
+    procedure Write_Message (Pipe : in out Pipe_Type; Message : String);
+    procedure Write_Message (Pipe : in out Pipe_Type;
+                             Message : Universal_String);
+    procedure Write_Message (Pipe : in out Pipe_Type;
+                             Message : Wide_Wide_String);
+    procedure Write_Message (Pipe : in out Pipe_Type;
+                             Message : Unbounded_String);
+
     function Get_Last_Message (Pipe : Pipe_Type) return Unbounded_String;
     function Get_Path (Pipe : Pipe_Type) return Unbounded_String;
+    function Get_Direction (Pipe : Pipe_Type) return Direction_Type;
 
     Pipe_Creation_Error : exception;
 
 private
 
     type Pipe_Type is tagged record
+        Direction : Direction_Type;
         Path : Unbounded_String;
         Last_Message : Unbounded_String;
     end record;

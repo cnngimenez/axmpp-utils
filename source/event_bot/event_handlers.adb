@@ -149,11 +149,16 @@ package body Event_Handlers is
 
         Put_Line (To_Wide_Wide_String (From));
 
-        if From = Self.To_Jid and then
-          Msg.Get_Body = Bye_Text
-        then
-            Self.Session.Send_Message ("Alright! Bye!");
-            Self.Session.Close;
+        if From = Self.To_JID then
+            if Self.Output_Pipe_Set then
+                Self.Output_Pipe.Write_Message (Msg.Get_Body);
+                Put_Line ("Message delivered to output pipe");
+            end if;
+
+            if  Msg.Get_Body = Bye_Text then
+                Self.Session.Send_Message ("Alright! Bye!");
+                Self.Session.Close;
+            end if;
         end if;
     end Message;
 
@@ -244,6 +249,13 @@ package body Event_Handlers is
     begin
         Self.Config := Config;
     end Set_Config;
+
+    procedure Set_Output_Pipe (Self : in out Event_Handler;
+                               Pipe : Pipe_Type) is
+    begin
+        Self.Output_Pipe_Set := True;
+        Self.Output_Pipe := Pipe;
+    end Set_Output_Pipe;
 
     --------------------
     --  Set_Presence  --

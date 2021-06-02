@@ -25,7 +25,7 @@ with XMPP.Messages;
 
 package body Event_Sessions is
 
-    use Xmpp.Objects;
+    use XMPP.Objects;
 
     procedure Send_Message (Self : in out Session; Text : Universal_String) is
         Message : XMPP.Messages.XMPP_Message;

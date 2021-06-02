@@ -60,11 +60,13 @@ procedure Event_Bot is
 
     Line : Universal_String;
     Bye_Text : constant Universal_String := S2Us ("bye");
-    Pipe : Pipe_Type;
+    Output_Pipe, Input_Pipe : Pipe_Type;
+
+    Startup_Pipe_Message : constant String := "Starting main loop...";
 begin
-    if Argument_Count < 1 then
+    if Argument_Count < 3 then
         Put_Line ("Synopsis:");
-        Put_Line ("    bin/event_bot JID pipefile");
+        Put_Line ("    bin/event_bot JID input_pipefile output_pipefile ");
         New_Line;
         Put_Line ("Send messages to the given JID.");
         return;
@@ -96,10 +98,14 @@ begin
     Put_Line ("Opening...");
     Session.Open;
 
-    Pipe.Initialize (Argument (2));
+    Input_Pipe.Initialize (Argument (2), Input_Only);
+    Output_Pipe.Initialize (Argument (3), Output_Only);
+
+    Handler.Set_Output_Pipe (Output_Pipe);
+    Output_Pipe.Write_Message (Startup_Pipe_Message);
 
     loop
-        Line := Pipe.Attend_Pipe;
+        Line := Input_Pipe.Attend_Pipe;
         Session.Send_Message (Line);
 
         exit when Line = Bye_Text;

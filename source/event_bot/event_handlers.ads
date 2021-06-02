@@ -11,6 +11,8 @@ with XMPP.Rosters;
 
 with Configs;
 use Configs;
+with Pipe_Manager;
+use Pipe_Manager;
 
 limited with Event_Sessions;
 
@@ -89,16 +91,21 @@ package Event_Handlers is
     procedure Set_To_JID (Self : in out Event_Handler;
                           To_JID : Universal_String);
 
+    procedure Set_Output_Pipe (Self : in out Event_Handler;
+                               Pipe : Pipe_Type);
+
 private
 
     type Event_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
        with
        record
-          Session : access Event_Sessions.Session;
+           Session : access Event_Sessions.Session;
 
-          Text : Universal_String;
-          To_JID : Universal_String;
-          Config : Config_Type;
+           Text : Universal_String;
+           To_JID : Universal_String;
+           Config : Config_Type;
+           Output_Pipe : Pipe_Type;
+           Output_Pipe_Set : Boolean := False;
        end record;
 
 end Event_Handlers;
