@@ -149,7 +149,7 @@ package body Event_Handlers is
 
         Put_Line (To_Wide_Wide_String (From));
 
-        if Self.Output_Pipe_Set then
+        if Self.Output_Pipe_Set and then not Msg.Get_Body.Is_Empty then
             Self.Output_Pipe.Write_Message (Msg.Get_From
                                               & (+":")
                                               & Msg.Get_Body);
