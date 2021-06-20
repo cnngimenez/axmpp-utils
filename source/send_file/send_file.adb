@@ -55,6 +55,8 @@ use Ada.Command_Line;
 --  use League.Strings;
 
 with Configs;
+with Files;
+use Files;
 
 procedure Send_File is
 
@@ -71,11 +73,11 @@ procedure Send_File is
       := new Send_File_Client.Session;
     H : constant not null Send_File_Handlers.Client_Handler_Access
       := new Send_File_Handlers.Client_Handler;
-
+    File_Info : File_Information;
 begin
-    if Argument_Count < 2 then
+    if Argument_Count /= 3 then
         Put_Line ("Synopsis:");
-        Put_Line ("    bin/send_message JID Message");
+        Put_Line ("    bin/send_message JID FilePath Mime-type");
         New_Line;
         Put_Line ("Send a message to the given JID");
         return;
@@ -86,11 +88,17 @@ begin
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
+    File_Info := Create (Argument (2));
+    File_Info.Set_Content_Type (Argument (3));
+    Put_Line ("File information:");
+    Put_Line (File_Info.To_String);
+
     XMPP.Logger.Enable_Debug;
     XMPP.Sessions.Initialize;
 
     S.Set_Stream_Handler (H);
     H.Set_Session_Object (S);
+    H.Set_File_Info (File_Info);
 
     S.Set_Host (Config.Host);
     S.Set_JID (Config.JID);
@@ -100,6 +108,6 @@ begin
     Put_Line ("Opening...");
     S.Open;
 
-    --  S.Close;
-    --  Put_Line ("Ended");
+    S.Close;
+    Put_Line ("Ended");
 end Send_File;
