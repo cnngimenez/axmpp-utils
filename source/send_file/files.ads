@@ -40,9 +40,11 @@ package Files is
     function Get_Size (Self : File_Information) return Integer;
     function Get_Size (Self : File_Information) return File_Size;
     procedure Set_Content_Type (Self : in out File_Information;
-                                Content_Type : Universal_String);
+                                Content_Type : String);
     function Get_Content_Type (Self : File_Information)
                               return Universal_String;
+
+    function To_String (Self : File_Information) return String;
 
     --  function Get_Base64 (Self : File_Information) return String;
     --  function Get_Base64 (Filepath : String) return String;
@@ -51,9 +53,9 @@ private
 
     type File_Information is tagged record
         Filepath : Unbounded_String;
-        Name : Universal_String;
+        Name : Unbounded_String;
         Size : File_Size;
-        Content_Type : Universal_String;
+        Content_Type : Unbounded_String;
     end record;
 
 end Files;

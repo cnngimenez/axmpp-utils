@@ -24,23 +24,22 @@ with Ada.Characters.Conversions;
 package body Files is
 
     function Create (Filepath : String) return File_Information is
-        use Ada.Characters.Conversions;
-
         File_Info : File_Information;
     begin
         File_Info.Filepath := To_Unbounded_String (Filepath);
         File_Info.Size := Ada.Directories.Size (Filepath);
-        File_Info.Name := To_Universal_String
-          (To_Wide_Wide_String
-             (Ada.Directories.Simple_Name (Filepath)));
+        File_Info.Name := To_Unbounded_String
+          (Ada.Directories.Simple_Name (Filepath));
         --  File Info.Content_Type :=
         return File_Info;
     end Create;
 
     function Get_Content_Type (Self : File_Information)
                               return Universal_String is
+        use Ada.Characters.Conversions;
     begin
-        return Self.Content_Type;
+        return League.Strings.To_Universal_String
+          (To_Wide_Wide_String (To_String (Self.Content_Type)));
     end Get_Content_Type;
 
     function Get_Filepath (Self : File_Information)
@@ -56,8 +55,10 @@ package body Files is
     end Get_Filepath;
 
     function Get_Name (Self : File_Information) return Universal_String is
+        use Ada.Characters.Conversions;
     begin
-        return Self.Name;
+        return League.Strings.To_Universal_String
+          (To_Wide_Wide_String (To_String (Self.Name)));
     end Get_Name;
 
     function Get_Size (Self : File_Information) return Universal_String is
@@ -80,9 +81,16 @@ package body Files is
     --  function Get_Base64 (Filepath : String) return String;
 
     procedure Set_Content_Type (Self : in out File_Information;
-                                Content_Type : Universal_String) is
+                                Content_Type : String) is
     begin
-        Self.Content_Type := Content_Type;
+        Self.Content_Type := To_Unbounded_String (Content_Type);
     end Set_Content_Type;
 
+    function To_String (Self : File_Information) return String is
+    begin
+        return "Filepath: " & To_String (Self.Filepath)
+          & "Name: " & To_String (Self.Name)
+          & "Size: " & Self.Size'Image
+          & "Content-type: " & To_String (Self.Content_Type);
+    end To_String;
 end Files;
