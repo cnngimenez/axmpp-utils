@@ -20,6 +20,8 @@
 -------------------------------------------------------------------------
 
 with Ada.Characters.Conversions;
+with Ada.Strings.Fixed;
+with Ada.Strings;
 
 package body Files is
 
@@ -62,9 +64,12 @@ package body Files is
     end Get_Name;
 
     function Get_Size (Self : File_Information) return Universal_String is
+        use Ada.Characters.Conversions;
+        use Ada.Strings.Fixed;
+        use Ada.Strings;
     begin
         return League.Strings.To_Universal_String
-          (Self.Size'Wide_Wide_Image);
+          (To_Wide_Wide_String (Trim (Self.Size'Image, Both)));
     end Get_Size;
 
     function Get_Size (Self : File_Information) return Integer is
@@ -89,8 +94,8 @@ package body Files is
     function To_String (Self : File_Information) return String is
     begin
         return "Filepath: " & To_String (Self.Filepath)
-          & "Name: " & To_String (Self.Name)
-          & "Size: " & Self.Size'Image
-          & "Content-type: " & To_String (Self.Content_Type);
+          & "| Name: " & To_String (Self.Name)
+          & "| Size: " & Self.Size'Image
+          & "| Content-type: " & To_String (Self.Content_Type);
     end To_String;
 end Files;
