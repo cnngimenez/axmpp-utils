@@ -24,7 +24,7 @@ PREFIX = /usr/local
 # extra_projects= -aP ../axmpp/gnat
 extra_projects =
 
-all: compile install
+all: compile
 
 compile: utils
 
