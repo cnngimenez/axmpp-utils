@@ -276,7 +276,7 @@ package body Event_Handlers is
 
         P.Set_Show (Online);
         P.Set_From (Complete_JID);
-        P.Set_Priority (50);
+        P.Set_Priority (0);
         --  P.Set_Type ();
         Self.Session.Send_Object (P);
     end Set_Presence;
