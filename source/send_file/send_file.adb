@@ -44,6 +44,7 @@ with Send_File_Handlers;
 with XMPP.Sessions;
 with XMPP.Logger;
 
+with Ada.Environment_Variables;
 with Ada.Text_IO;
 use Ada.Text_IO;
 with Ada.Command_Line;
@@ -68,6 +69,7 @@ procedure Send_File is
     --        (To_Wide_Wide_String (S));
     --  end S2Us;
 
+    Home_Path : String := Ada.Environment_Variables.Value ("HOME");
     Config : Configs.Config_Type;
     S : constant not null Send_File_Client.Session_Access
       := new Send_File_Client.Session;
@@ -84,7 +86,7 @@ begin
     end if;
 
     Put_Line ("Loading config.");
-    Config.Load ("config/connection.cfg");
+    Config.Load (Home_Path & "/.config/axmpp-utils/connection.cfg");
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
