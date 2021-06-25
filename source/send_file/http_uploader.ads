@@ -26,8 +26,10 @@ package HTTP_Uploader is
 
     --  Upload a file using HTTP PUT.
     procedure Upload_File (Put_Url : Universal_String;
-                           Path : String);
+                           Path : String;
+                           Mime_Type : String);
     procedure Upload_File (Put_Url : String;
-                           Path : String);
+                           Path : String;
+                           Mime_Type : String);
 
 end HTTP_Uploader;
