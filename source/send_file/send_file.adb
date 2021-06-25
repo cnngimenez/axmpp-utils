@@ -44,6 +44,8 @@ with Send_File_Handlers;
 with XMPP.Sessions;
 with XMPP.Logger;
 
+with Ada.Task_Identification;
+use Ada.Task_Identification;
 with Ada.Environment_Variables;
 with Ada.Text_IO;
 use Ada.Text_IO;
@@ -69,7 +71,7 @@ procedure Send_File is
     --        (To_Wide_Wide_String (S));
     --  end S2Us;
 
-    Home_Path : String := Ada.Environment_Variables.Value ("HOME");
+    Home_Path : constant String := Ada.Environment_Variables.Value ("HOME");
     Config : Configs.Config_Type;
     S : constant not null Send_File_Client.Session_Access
       := new Send_File_Client.Session;
@@ -82,6 +84,9 @@ begin
         Put_Line ("    bin/send_message JID FilePath Mime-type");
         New_Line;
         Put_Line ("Send a message to the given JID");
+        --  For some reason the return does not work.
+        --  GNAT.OS_Lib.OS_Exit (0);
+        Set_Exit_Status (Success);
         return;
     end if;
 
@@ -90,8 +95,19 @@ begin
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
+    H.Set_To_JID (Argument (1));
+
+    Put_Line ("Creating fileinfo");
     File_Info := Create (Argument (2));
     File_Info.Set_Content_Type (Argument (3));
+
+    Put_Line ("checking existence");
+    if not File_Info.File_Exists then
+        Put_Line ("Provided file does not exists!");
+        Set_Exit_Status (Failure);
+        return;
+    end if;
+
     Put_Line ("File information:");
     Put_Line (File_Info.To_String);
 
@@ -110,6 +126,6 @@ begin
     Put_Line ("Opening...");
     S.Open;
 
-    S.Close;
-    Put_Line ("Ended");
+    --  S.Close;
+    --  Put_Line ("Ended");
 end Send_File;
