@@ -33,6 +33,7 @@ package Files is
     --  Take the file information from the given existent file.
     function Create (Filepath : String) return File_Information;
 
+    function File_Exists (Self : File_Information) return Boolean;
     function Get_Filepath (Self : File_Information) return Unbounded_String;
     function Get_Filepath (Self : File_Information) return String;
     function Get_Name (Self : File_Information) return Universal_String;
@@ -43,6 +44,8 @@ package Files is
                                 Content_Type : String);
     function Get_Content_Type (Self : File_Information)
                               return Universal_String;
+    function Get_Content_Type (Self : File_Information)
+                              return String;
 
     function To_String (Self : File_Information) return String;
 

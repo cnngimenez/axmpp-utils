@@ -29,12 +29,24 @@ package body Files is
         File_Info : File_Information;
     begin
         File_Info.Filepath := To_Unbounded_String (Filepath);
-        File_Info.Size := Ada.Directories.Size (Filepath);
+        if File_Info.File_Exists then
+            File_Info.Size := Ada.Directories.Size (Filepath);
+        else
+            File_Info.Size := 0;
+        end if;
         File_Info.Name := To_Unbounded_String
           (Ada.Directories.Simple_Name (Filepath));
+
         --  File Info.Content_Type :=
         return File_Info;
     end Create;
+
+    function File_Exists (Self : File_Information) return Boolean is
+        Filepath : constant String := To_String (Self.Filepath);
+    begin
+        return Ada.Directories.Exists (Filepath) and then
+          Ada.Directories.Kind (Filepath) = Ordinary_File;
+    end File_Exists;
 
     function Get_Content_Type (Self : File_Information)
                               return Universal_String is
@@ -43,6 +55,13 @@ package body Files is
         return League.Strings.To_Universal_String
           (To_Wide_Wide_String (To_String (Self.Content_Type)));
     end Get_Content_Type;
+
+    function Get_Content_Type (Self : File_Information)
+                              return String is
+    begin
+        return To_String (Self.Content_Type);
+    end Get_Content_Type;
+
 
     function Get_Filepath (Self : File_Information)
                           return Unbounded_String is
