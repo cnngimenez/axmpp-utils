@@ -141,6 +141,8 @@ package Send_File_Handlers is
     procedure Set_File_Info (Self : in out Client_Handler;
                              File_Info : File_Information);
 
+    procedure Set_To_JID (Self : in out Client_Handler;
+                          JID : String);
 private
 
     type Client_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
@@ -150,6 +152,7 @@ private
 
            Config : Config_Type;
            File_Info : File_Information;
+           To_JID : Universal_String;
        end record;
 
 end Send_File_Handlers;

@@ -42,6 +42,7 @@
 with Ada.Task_Identification;
 with Ada.Wide_Wide_Text_IO;
 use Ada.Wide_Wide_Text_IO;
+with Ada.Characters.Conversions;
 
 with Send_File_Client;
 
@@ -164,13 +165,30 @@ package body Send_File_Handlers is
       (Self : in out Client_Handler;
        IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class) is
         --  pragma Unreferenced (Self);
-    begin
-        Put_Line ("IQ Upload handler");
-        Put_Line ("Get URL:" & To_Wide_Wide_String (IQ_Upload.Get_Get_URL));
-        Put_Line ("Put URL:" & To_Wide_Wide_String (IQ_Upload.Get_Put_URL));
 
-        HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
-                                   Self.File_Info.Get_Filepath);
+        procedure Send_Message;
+
+        procedure Send_Message is
+            Message : XMPP.Messages.XMPP_Message;
+        begin
+            Message.Set_Type (XMPP.Chat);
+            Message.Set_Body (IQ_Upload.Get_Get_URL);
+            Message.Set_To (Self.To_JID);
+            Message.Set_From (Self.Config.JID);
+
+            Self.Object.Send_Object (Message);
+        end Send_Message;
+    begin
+        Put_Line ("IQ_Upload handler");
+        Put_Line ("  Get URL:" & To_Wide_Wide_String (IQ_Upload.Get_Get_URL));
+        Put_Line ("  Put URL:" & To_Wide_Wide_String (IQ_Upload.Get_Put_URL));
+
+        Put_Line ("  Uploading file to Put URL.");
+        --  HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
+        --                             Self.File_Info.Get_Filepath,
+        --                             Self.File_Info.Get_Content_Type);
+        Put_Line ("  Sending message to JID.");
+        Send_Message;
     end IQ_Upload;
 
     overriding procedure Message
@@ -308,6 +326,13 @@ package body Send_File_Handlers is
         Put_Line ("Setting session object");
         Self.Object := Object;
     end Set_Session_Object;
+
+    procedure Set_To_JID (Self : in out Client_Handler;
+                          JID : String) is
+        use Ada.Characters.Conversions;
+    begin
+        Self.To_JID := To_Universal_String (To_Wide_Wide_String (JID));
+    end Set_To_JID;
 
     --------------------
     --  Start_Stream  --
