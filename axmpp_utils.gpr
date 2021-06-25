@@ -1,27 +1,30 @@
 with "matreshka_league";
 with "axmpp";
-with "utilada_http";
+with "aws";
 
 Project Axmpp_Utils is
-  
-  for Source_Dirs use ("source", 
+
+  for Source_Dirs use ("source",
                        "source/echo_bot",
                        "source/send_message",
                        "source/send_file",
-                       "source/event_bot"
+                       "source/event_bot",
+                       "source/xmpp_sniffer"
                       );
   for Object_Dir use ".objs";
   for Exec_Dir use "bin";
-  
+
   for Main use (
                 "plain_password.adb",
                 "remove_host.adb",
                 "echo_bot.adb",
                 "send_message.adb",
                 "send_file.adb",
-                "event_bot.adb"
+                "event_bot.adb",
+                "xmpp_sniffer.adb",
+                "uploader.adb"
                );
-  
+
   package Compiler is
       for Default_Switches ("Ada") use
         (
@@ -36,7 +39,7 @@ Project Axmpp_Utils is
          --  "-fPIC"
          --  Print full path
          "-gnatef"
-	);
+       );
   end Compiler;
-    
+
 end Axmpp_Utils;
