@@ -63,6 +63,7 @@ with XMPP.Logger;
 use XMPP.Logger;
 
 with HTTP_Uploader;
+with XMPP.Messages.XMPP_File_Messages;
 
 package body Send_File_Handlers is
 
@@ -169,24 +170,27 @@ package body Send_File_Handlers is
         procedure Send_Message;
 
         procedure Send_Message is
-            Message : XMPP.Messages.XMPP_Message;
+            use XMPP.Messages.XMPP_File_Messages;
+            Message : XMPP_File_Message;
         begin
             Message.Set_Type (XMPP.Chat);
             Message.Set_Body (IQ_Upload.Get_Get_URL);
             Message.Set_To (Self.To_JID);
             Message.Set_From (Self.Config.JID);
+            Message.Set_File_Get_Url (IQ_Upload.Get_Get_Url);
 
             Self.Object.Send_Object (Message);
         end Send_Message;
+
     begin
         Put_Line ("IQ_Upload handler");
         Put_Line ("  Get URL:" & To_Wide_Wide_String (IQ_Upload.Get_Get_URL));
         Put_Line ("  Put URL:" & To_Wide_Wide_String (IQ_Upload.Get_Put_URL));
 
         Put_Line ("  Uploading file to Put URL.");
-        --  HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
-        --                             Self.File_Info.Get_Filepath,
-        --                             Self.File_Info.Get_Content_Type);
+        HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
+                                   Self.File_Info.Get_Filepath,
+                                   Self.File_Info.Get_Content_Type);
         Put_Line ("  Sending message to JID.");
         Send_Message;
     end IQ_Upload;

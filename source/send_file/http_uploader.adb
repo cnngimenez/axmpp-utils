@@ -19,11 +19,15 @@
 
 -------------------------------------------------------------------------
 
+with Ada.Exceptions;
+use Ada.Exceptions;
 with Ada.Directories;
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
 with Ada.Text_IO;
 with Ada.Strings.Unbounded;
+with Ada.Strings;
+with Ada.Strings.Fixed;
 
 with AWS.Client;
 with AWS.Response;
@@ -58,9 +62,15 @@ package body HTTP_Uploader is
     procedure Upload_File (Put_Url : Universal_String;
                            Path : String;
                            Mime_Type : String) is
+        Url : constant String := Wws2s (To_Wide_Wide_String (Put_Url));
+        use Ada.Text_IO;
     begin
-        Upload_File (Wws2s (To_Wide_Wide_String (Put_Url)),
-                     Path, Mime_Type);
+        Upload_File (Url, Path, Mime_Type);
+    exception
+    when Errors : others =>
+        Put_Line ("Error in HTTP_Upload.Upload_File 1:");
+        Put_Line (Exception_Information (Errors));
+        raise;
     end Upload_File;
 
     procedure Upload_File (Put_Url : String;
@@ -73,7 +83,7 @@ package body HTTP_Uploader is
 
         procedure Check_Certificate
           (Certificate : AWS.Net.SSL.Certificate.Object);
-        procedure Show_Progress (Total, Sent : Stream_Element_Offset);
+        --  procedure Show_Progress (Total, Sent : Stream_Element_Offset);
 
         procedure Check_Certificate
           (Certificate : AWS.Net.SSL.Certificate.Object) is
@@ -96,10 +106,10 @@ package body HTTP_Uploader is
             Put_Line ("--");
         end Check_Certificate;
 
-        procedure Show_Progress (Total, Sent : Stream_Element_Offset) is
-        begin
-            Put_Line ("Uploading " & Sent'Image & " of " & Total'Image);
-        end Show_Progress;
+        --  procedure Show_Progress (Total, Sent : Stream_Element_Offset) is
+        --  begin
+        --      Put_Line ("Uploading " & Sent'Image & " of " & Total'Image);
+        --  end Show_Progress;
 
         Connection : Client.HTTP_Connection;
         Rdata : Response.Data;
@@ -108,10 +118,11 @@ package body HTTP_Uploader is
         use Ada.Streams.Stream_IO;
         Filesize : constant Stream_Element_Offset :=
           Stream_Element_Offset (Ada.Directories.Size (Path));
-        Stream_Array : Stream_Element_Array (0 .. Filesize);
+        Stream_Array : Stream_Element_Array (1 .. Filesize);
         Stream_Offset : Stream_Element_Offset;
         File : Stream_IO.File_Type;
     begin
+        Put_Line ("Path: " & Path);
         Stream_IO.Open (File, In_File, Path);
         Stream_IO.Read (File, Stream_Array, Stream_Offset);
         Put_Line ("Stream offset: " & Stream_Offset'Image);
@@ -122,6 +133,10 @@ package body HTTP_Uploader is
         AWS.Containers.Tables.Add
           (AWS.Containers.Tables.Table_Type (Header_List),
            "Content-Type", Mime_Type);
+        AWS.Containers.Tables.Add
+          (AWS.Containers.Tables.Table_Type (Header_List),
+           "Content-Length",
+           Ada.Strings.Fixed.Trim (Filesize'Image, Ada.Strings.Both));
 
         Client.Create (Connection => Connection,
                        Host => Put_Url);
@@ -149,6 +164,11 @@ package body HTTP_Uploader is
 
         Client.Close (Connection);
         Close (File);
+    exception
+    when Errors : others =>
+        Put_Line ("Error in HTTP_Upload:");
+        Put_Line (Exception_Information (Errors));
+        raise;
     end Upload_File;
 
     --  Convert from Wide_Wide_String to String
