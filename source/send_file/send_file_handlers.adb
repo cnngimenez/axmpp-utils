@@ -188,6 +188,10 @@ package body Send_File_Handlers is
                         (Self.File_Info.Get_Filepath));
 
             Send_Upload_IQ_Request (Self);
+        else
+            Put_Line ("  There is no other file.");
+            Put_Line ("  Closing connection.");
+            Self.Object.Close;
         end if;
 
     end IQ_Upload;
