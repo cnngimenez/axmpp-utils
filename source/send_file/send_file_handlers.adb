@@ -167,21 +167,6 @@ package body Send_File_Handlers is
        IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class) is
         --  pragma Unreferenced (Self);
 
-        procedure Send_Message;
-
-        procedure Send_Message is
-            use XMPP.Messages.XMPP_File_Messages;
-            Message : XMPP_File_Message;
-        begin
-            Message.Set_Type (XMPP.Chat);
-            Message.Set_Body (IQ_Upload.Get_Get_URL);
-            Message.Set_To (Self.To_JID);
-            Message.Set_From (Self.Config.JID);
-            Message.Set_File_Get_Url (IQ_Upload.Get_Get_Url);
-
-            Self.Object.Send_Object (Message);
-        end Send_Message;
-
     begin
         Put_Line ("IQ_Upload handler");
         Put_Line ("  Get URL:" & To_Wide_Wide_String (IQ_Upload.Get_Get_URL));
@@ -191,8 +176,20 @@ package body Send_File_Handlers is
         HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
                                    Self.File_Info.Get_Filepath,
                                    Self.File_Info.Get_Content_Type);
+
         Put_Line ("  Sending message to JID.");
-        Send_Message;
+        Send_Messages (Self, IQ_Upload.Get_Get_URL);
+
+        if There_Is_Next_File (Self) then
+            Put_Line ("  There is still another file.");
+            Next_File (Self);
+            Put_Line ("  Current file: "
+                        & Ada.Characters.Conversions.To_Wide_Wide_String
+                        (Self.File_Info.Get_Filepath));
+
+            Send_Upload_IQ_Request (Self);
+        end if;
+
     end IQ_Upload;
 
     overriding procedure Message
@@ -203,6 +200,19 @@ package body Send_File_Handlers is
     begin
         Put_Line ("Message received");
     end Message;
+
+    procedure Next_File (Self : in out Client_Handler) is
+        File_Info : File_Information;
+    begin
+        if Self.There_Is_Next_File then
+            Self.Current_Index := Self.Current_Index + 1;
+
+            File_Info := Self.Send_List.Get_File_Information
+              (Self.Current_Index);
+
+            Self.Set_File_Info (File_Info);
+        end if;
+    end Next_File;
 
     ----------------
     --  Presence  --
@@ -253,6 +263,63 @@ package body Send_File_Handlers is
         Put_Roster (XMPP_Roster (Data));
     end Roster;
 
+    procedure Send_Message (Self : in out Client_Handler;
+                            File_Get_URL : Universal_String;
+                            To_JID : Universal_String) is
+        use XMPP.Messages.XMPP_File_Messages;
+        Message : XMPP_File_Message;
+    begin
+        Message.Set_Type (XMPP.Chat);
+        Message.Set_Body (File_Get_URL);
+        Message.Set_To (To_JID);
+        Message.Set_From (Self.Config.JID);
+        Message.Set_File_Get_Url (File_Get_URL);
+
+        Self.Object.Send_Object (Message);
+    end Send_Message;
+
+    procedure Send_Messages (Self : in out Client_Handler;
+                             File_Get_URL : Universal_String) is
+
+        procedure Send_Get_Url (Filename : String; To_Url : String);
+
+        procedure Send_Get_Url (Filename : String; To_Url : String) is
+            Wws_To_Url : constant Wide_Wide_String :=
+              Ada.Characters.Conversions.To_Wide_Wide_String (To_Url);
+            U_To_Url : constant Universal_String :=
+              To_Universal_String (Wws_To_Url);
+            Wws_Filename : constant Wide_Wide_String :=
+              Ada.Characters.Conversions.To_Wide_Wide_String (Filename);
+        begin
+            Put_Line ("Sending Get URL of "
+                        & Wws_Filename
+                        & ":");
+            Put_Line (Wws_To_Url);
+            Send_Message (Self, File_Get_URL, U_To_Url);
+        end Send_Get_Url;
+
+    begin
+        Self.Send_List.Iterate_JIDs (Self.Current_Index, Send_Get_Url'Access);
+    end Send_Messages;
+
+    procedure Send_Upload_IQ_Request (Self : in out Client_Handler) is
+        Request : XMPP.IQ_Requests.XMPP_IQ_Request;
+    begin
+        Put_Line ("Sending File Upload Slot Request...");
+        --  TODO: Obtain from Disco discovery request.
+        Request.Set_To (To_Universal_String ("upload.")
+                          & Self.Config.Host);
+        Request.Set_From (Self.Config.JID);
+
+        Request.Set_Filename (Self.File_Info.Get_Name);
+        Request.Set_Size (Self.File_Info.Get_Size);
+        Request.Set_Content_Type (Self.File_Info.Get_Content_Type);
+
+        Self.Object.Send_Object (Request);
+
+        --  Self.Object.Close;
+    end Send_Upload_IQ_Request;
+
     ---------------------
     --  Session_State  --
     ---------------------
@@ -260,7 +327,6 @@ package body Send_File_Handlers is
       (Self   : in out Client_Handler;
        Status : XMPP.Session_State) is
 
-        Request : XMPP.IQ_Requests.XMPP_IQ_Request;
     begin
         Put_Line ("Session_state:");
         if Status = XMPP.Established then
@@ -270,19 +336,8 @@ package body Send_File_Handlers is
             --  sending presence
             --  Self.Set_Presence;
 
-            Put_Line ("Sending Slot Request...");
-            --  TODO: Obtain from Disco discovery request.
-            Request.Set_To (To_Universal_String ("upload.")
-                              & Self.Config.Host);
-            Request.Set_From (Self.Config.JID);
-
-            Request.Set_Filename (Self.File_Info.Get_Name);
-            Request.Set_Size (Self.File_Info.Get_Size);
-            Request.Set_Content_Type (Self.File_Info.Get_Content_Type);
-
-            Self.Object.Send_Object (Request);
-
-            --  Self.Object.Close;
+            Self.Next_File;
+            Self.Send_Upload_IQ_Request;
         end if;
     end Session_State;
 
@@ -320,6 +375,12 @@ package body Send_File_Handlers is
         Self.Object.Send_Object (P);
     end Set_Presence;
 
+    procedure Set_Send_List (Self : in out Client_Handler;
+                             Send_List : Send_List_Type) is
+    begin
+        Self.Send_List := Send_List;
+    end Set_Send_List;
+
     --------------------------
     --  Set_Session_Object  --
     --------------------------
@@ -331,12 +392,12 @@ package body Send_File_Handlers is
         Self.Object := Object;
     end Set_Session_Object;
 
-    procedure Set_To_JID (Self : in out Client_Handler;
-                          JID : String) is
-        use Ada.Characters.Conversions;
-    begin
-        Self.To_JID := To_Universal_String (To_Wide_Wide_String (JID));
-    end Set_To_JID;
+    --  procedure Set_To_JID (Self : in out Client_Handler;
+    --                        JID : String) is
+    --      use Ada.Characters.Conversions;
+    --  begin
+    --      Self.To_JID := To_Universal_String (To_Wide_Wide_String (JID));
+    --  end Set_To_JID;
 
     --------------------
     --  Start_Stream  --
@@ -361,5 +422,11 @@ package body Send_File_Handlers is
     begin
         Ada.Wide_Wide_Text_IO.Put_Line ("Stream_Features called");
     end Stream_Features;
+
+    function There_Is_Next_File (Self : in out Client_Handler)
+                                return Boolean is
+    begin
+        return Self.Send_List.Exists_Index (Self.Current_Index + 1);
+    end There_Is_Next_File;
 
 end Send_File_Handlers;

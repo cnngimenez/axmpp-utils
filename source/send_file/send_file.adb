@@ -44,8 +44,6 @@ with Send_File_Handlers;
 with XMPP.Sessions;
 with XMPP.Logger;
 
-with Ada.Task_Identification;
-use Ada.Task_Identification;
 with Ada.Environment_Variables;
 with Ada.Text_IO;
 use Ada.Text_IO;
@@ -53,17 +51,19 @@ with Ada.Command_Line;
 use Ada.Command_Line;
 --  with Ada.Characters.Conversions;
 --  use Ada.Characters.Conversions;
+with Ada.Directories;
 
 --  with League.Strings;
 --  use League.Strings;
 
 with Configs;
-with Files;
-use Files;
+with Send_Lists;
+use Send_Lists;
 
 procedure Send_File is
 
     --  function S2Us (S : String) return Universal_String;
+    function Load_Send_List return Boolean;
 
     --  function S2Us (S : String) return Universal_String is
     --  begin
@@ -77,46 +77,75 @@ procedure Send_File is
       := new Send_File_Client.Session;
     H : constant not null Send_File_Handlers.Client_Handler_Access
       := new Send_File_Handlers.Client_Handler;
-    File_Info : File_Information;
+    Send_List : Send_List_Type;
+
+    function Load_Send_List return Boolean is
+    begin
+        if Ada.Directories.Exists (Argument (1)) then
+            Send_List.Fill_From_File (Argument (1));
+            return True;
+        else
+            Put_Line ("The file does not exists!");
+            return False;
+        end if;
+    end Load_Send_List;
+
 begin
-    if Argument_Count /= 3 then
+    if Argument_Count /= 3 and then Argument_Count /= 1 then
         Put_Line ("Synopsis:");
-        Put_Line ("    bin/send_message JID FilePath Mime-type");
+        Put_Line ("    bin/send_file JID FilePath Mime-type");
+        Put_Line ("    bin/send_file ListFile");
         New_Line;
-        Put_Line ("Send a message to the given JID");
+        Put_Line ("Send a message to the given JID.");
+        Put_Line ("The second syntax use a list of files and JID in a file");
+        Put_Line ("with the following format:");
+        New_Line;
+        Put_Line ("Path to file-1");
+        Put_Line ("MIME-Type-1");
+        Put_Line ("JID_1_1@xmpp.org");
+        Put_Line ("JID_1_2@xmpp.org");
+        Put_Line ("...");
+        Put_Line ("--");
+        Put_Line ("...");
+        Put_Line ("--");
+        Put_Line ("Path to file-n");
+        Put_Line ("MIME-Type-n");
+        Put_Line ("JID_n_1@xmpp.org");
+        Put_Line ("JID_n_2@xmpp.org");
+        Put_Line ("...");
         --  For some reason the return does not work.
         --  GNAT.OS_Lib.OS_Exit (0);
         Set_Exit_Status (Success);
         return;
     end if;
 
+    if Argument_Count = 1 then
+        if not Load_Send_List then
+            Set_Exit_Status (Failure);
+            return;
+        end if;
+    else
+        Send_List.Add (Argument (2), Argument (3), Argument (1));
+    end if;
+
+    Put_Line ("Files to send loaded:");
+    Put_Line (To_String (Send_List));
+
+    --  TODO Check file existence...
+
     Put_Line ("Loading config.");
     Config.Load (Home_Path & "/.config/axmpp-utils/connection.cfg");
     H.Set_Config (Config);
     Put_Line ("Config loaded.");
 
-    H.Set_To_JID (Argument (1));
-
-    Put_Line ("Creating fileinfo");
-    File_Info := Create (Argument (2));
-    File_Info.Set_Content_Type (Argument (3));
-
-    Put_Line ("checking existence");
-    if not File_Info.File_Exists then
-        Put_Line ("Provided file does not exists!");
-        Set_Exit_Status (Failure);
-        return;
-    end if;
-
-    Put_Line ("File information:");
-    Put_Line (File_Info.To_String);
+    H.Set_Send_List (Send_List);
 
     XMPP.Logger.Enable_Debug;
     XMPP.Sessions.Initialize;
 
     S.Set_Stream_Handler (H);
     H.Set_Session_Object (S);
-    H.Set_File_Info (File_Info);
+    --  H.Set_File_Info (File_Info);
 
     S.Set_Host (Config.Host);
     S.Set_JID (Config.JID);

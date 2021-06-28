@@ -55,6 +55,8 @@ with Files;
 use Files;
 with Configs;
 use Configs;
+with Send_Lists;
+use Send_Lists;
 
 limited with Send_File_Client;
 
@@ -138,11 +140,8 @@ package Send_File_Handlers is
     procedure Set_Config (Self : in out Client_Handler;
                           Config : Config_Type);
 
-    procedure Set_File_Info (Self : in out Client_Handler;
-                             File_Info : File_Information);
-
-    procedure Set_To_JID (Self : in out Client_Handler;
-                          JID : String);
+    procedure Set_Send_List (Self : in out Client_Handler;
+                             Send_List : Send_List_Type);
 private
 
     type Client_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
@@ -151,8 +150,23 @@ private
            Object : access Send_File_Client.Session;
 
            Config : Config_Type;
+           Send_List : Send_List_Type;
+
+           --  Current file to send
            File_Info : File_Information;
-           To_JID : Universal_String;
+           Current_Index : Natural := 0;
        end record;
+
+    procedure Send_Upload_IQ_Request (Self : in out Client_Handler);
+    procedure Next_File (Self : in out Client_Handler);
+    procedure Send_Message (Self : in out Client_Handler;
+                            File_Get_URL : Universal_String;
+                            To_JID : Universal_String);
+    procedure Send_Messages (Self : in out Client_Handler;
+                             File_Get_URL : Universal_String);
+    function There_Is_Next_File (Self : in out Client_Handler) return Boolean;
+
+    procedure Set_File_Info (Self : in out Client_Handler;
+                             File_Info : File_Information);
 
 end Send_File_Handlers;
