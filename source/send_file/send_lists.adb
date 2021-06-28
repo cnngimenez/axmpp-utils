@@ -137,7 +137,7 @@ package body Send_Lists is
         use Send_File_Package;
         C : Cursor := First (Self);
     begin
-        for I in 1 .. Index loop
+        for I in 1 .. (Index - 1) loop
             Next (C);
         end loop;
 
