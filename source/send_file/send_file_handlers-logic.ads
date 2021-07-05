@@ -21,10 +21,10 @@
 
 package Send_File_Handlers.Logic is
 
+    type Sclient_Handler is limited new Client_Handler with private;
     type Logic_Data_Type is tagged private;
 
-    procedure Send_Next_File (Self : in out Logic_Data_Type;
-                              Client : in out Client_Handler;
+    procedure Send_Next_File (Self : in out SClient_Handler;
                               Put_URL, Get_URL : Universal_String);
     --  Start the overal process sending all the files from the Send List to
     --  all users. Send List provides a list of files to upload and a list
@@ -35,6 +35,10 @@ package Send_File_Handlers.Logic is
     --  begining of the session.
 
 private
+
+    type Sclient_Handler is limited new Client_Handler with record
+        Data : Logic_Data_Type;
+    end record;
 
     type Logic_Data_Type is tagged record
         Send_List : Send_List_Type;
@@ -68,5 +72,8 @@ private
 
     procedure Set_File_Info (Client : in out Client_Handler;
                              File_Info : File_Information);
+
+    procedure Set_Send_List (Self : in out Logic_Data_Type;
+                             Send_List : Send_List_Type);
 
 end Send_File_Handlers.Logic;

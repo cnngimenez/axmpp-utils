@@ -44,6 +44,13 @@ package body Send_File_Handlers.Logic is
         end if;
     end Next_File;
 
+    procedure Send_First (Self : in out Logic_Data_Type;
+                          Client : in out Client_Handler) is
+    begin
+        Self.Next_File (Client);
+        Send_Upload_IQ_Request (Client);
+    end Send_First;
+
     procedure Send_Message (Client : in out Client_Handler;
                             File_Get_URL : Universal_String;
                             To_JID : Universal_String) is
@@ -131,6 +138,13 @@ package body Send_File_Handlers.Logic is
     begin
         Client.File_Info := File_Info;
     end Set_File_Info;
+
+    procedure Set_Send_List (Self : in out Logic_Data_Type;
+                             Send_List : Send_List_Type) is
+    begin
+        Self.Send_List := Send_List;
+    end Set_Send_List;
+
 
     function There_Is_Next_File (Self : in out Logic_Data_Type)
                                 return Boolean is

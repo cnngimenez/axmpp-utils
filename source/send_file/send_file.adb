@@ -40,7 +40,7 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 with Send_File_Client;
-with Send_File_Handlers;
+with Send_File_Handlers.Handlers;
 with XMPP.Sessions;
 with XMPP.Logger;
 
@@ -76,7 +76,7 @@ procedure Send_File is
     S : constant not null Send_File_Client.Session_Access
       := new Send_File_Client.Session;
     H : constant not null Send_File_Handlers.Client_Handler_Access
-      := new Send_File_Handlers.Client_Handler;
+      := new Send_File_Handlers.Handlers.Send_File_Handler;
     Send_List : Send_List_Type;
 
     function Load_Send_List return Boolean is

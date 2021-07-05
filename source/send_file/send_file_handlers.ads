@@ -42,14 +42,8 @@
 with League.Strings;
 use League.Strings;
 
-with XMPP.Presences;
 with XMPP.Stream_Handlers;
-with XMPP.Streams;
 with XMPP.Stream_Features;
-with XMPP.IQS;
-with XMPP.Messages;
-with XMPP.Rosters;
-with XMPP.IQ_Uploads;
 
 with Files;
 use Files;
@@ -73,98 +67,76 @@ package Send_File_Handlers is
 
     type Client_Handler_Access is access all Client_Handler'Class;
 
-    overriding procedure Connected
-      (Self   : in out Client_Handler;
-       Object : XMPP.Stream_Features.XMPP_Stream_Feature'Class);
-    --  We whant to handle connected event.
-
-    overriding procedure Disconnected
-      (Self : in out Client_Handler);
-
-    overriding procedure End_Stream
-      (Self : in out Client_Handler);
-
-    overriding procedure Start_Stream
-      (Self   : in out Client_Handler;
-       Object : XMPP.Streams.XMPP_Stream'Class);
-    --  We whant to handle Start_Stream event.
-
-    overriding procedure Stream_Features
-      (Self   : in out Client_Handler;
-       Object : XMPP.Stream_Features.XMPP_Stream_Feature'Class);
-    --  We whant to get stream features.
-
-    overriding procedure Presence
-      (Self : in out Client_Handler;
-       Data : XMPP.Presences.XMPP_Presence'Class);
-    --  We whant to receive presence events.
-
-    overriding procedure Bind_Resource_State
-      (Self   : in out Client_Handler;
-       JID    : League.Strings.Universal_String;
-       Status : XMPP.Bind_State);
-    --  We whant to know, what resource was binded, and if it was successfull.
-
-    overriding procedure Session_State
-      (Self   : in out Client_Handler;
-       Status : XMPP.Session_State);
-    --  We whant to get information about session state.
-
-    overriding procedure IQ
-      (Self : in out Client_Handler;
-       IQ   : XMPP.IQS.XMPP_IQ'Class);
-
-    overriding procedure IQ_Upload
-      (Self : in out Client_Handler;
-       IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class);
-
-    overriding procedure Roster
-      (Self : in out Client_Handler;
-       Data : XMPP.Rosters.XMPP_Roster'Class);
-
-    overriding procedure Message
-      (Self : in out Client_Handler;
-       Msg : XMPP.Messages.XMPP_Message'Class);
-
-    overriding procedure Error
-      (Self : in out Client_Handler);
+    procedure Set_Config (Self : in out Client_Handler;
+                          Config : Config_Type);
+    procedure Set_Send_List (Self : in out Client_Handler;
+                             Send_List : Send_List_Type);
 
     procedure Set_Session_Object
       (Self   : in out Client_Handler;
        Object : not null access Send_File_Client.Session'Class);
     --  Function to set session object in handler.
 
-    procedure Set_Presence (Self : in out Client_Handler);
-    --  Declaring function to set presence.
+    overriding procedure Connected
+      (Self   : in out Client_Handler;
+       Object : XMPP.Stream_Features.XMPP_Stream_Feature'Class) is null;
+    --  We whant to handle connected event.
 
-    procedure Set_Config (Self : in out Client_Handler;
-                          Config : Config_Type);
-
-    procedure Set_Send_List (Self : in out Client_Handler;
-                             Send_List : Send_List_Type);
 private
+
+    type Logic_Data_Type is tagged record
+        Send_List : Send_List_Type;
+
+        --  Current file to send
+        File_Info : File_Information;
+        Current_Index : Natural := 0;
+    end record;
 
     type Client_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
        with
        record
            Object : access Send_File_Client.Session;
-
            Config : Config_Type;
-           Send_List : Send_List_Type;
 
-           --  Current file to send
-           File_Info : File_Information;
-           Current_Index : Natural := 0;
+           Data : Logic_Data_Type;
        end record;
 
+    procedure Send_First (Self : in out Client_Handler);
+    --  Send the first IQ Upload request. This must be used before
+    --  Send_Next_File.
+
+    procedure Send_Next_File (Self : in out Client_Handler;
+                              Put_URL, Get_URL : Universal_String);
+    --  Start the overal process sending all the files from the Send List to
+    --  all users. Send List provides a list of files to upload and a list
+    --  of users who want to receive them. It will be uploaded and sent one
+    --  file per turn.
+    --
+    --  Call this procedure each time the IQ Request ansewrs or at the
+    --  begining of the session.
+
+    procedure Send_Presence (Self : in out Client_Handler);
+    --  Declaring function to set presence.
+
     procedure Send_Upload_IQ_Request (Self : in out Client_Handler);
+    --  Send the File Upload IQ Request (ask for a new slot) to the server.
+    --  This will retrieve the GET and PUT URL.
+
     procedure Next_File (Self : in out Client_Handler);
-    procedure Send_Message (Self : in out Client_Handler;
+    --  If there is another file, set it as current file to process.
+
+    procedure Send_Message (Client : in out Client_Handler;
                             File_Get_URL : Universal_String;
                             To_JID : Universal_String);
+    --  Send message with the File GET URL to one JID.
+
     procedure Send_Messages (Self : in out Client_Handler;
                              File_Get_URL : Universal_String);
+    --  Send messages with the File Get URL to all users. Use the hash and the
+    --  current index to retrieve the user lists.
+
     function There_Is_Next_File (Self : in out Client_Handler) return Boolean;
+    --  Is there another file to send?
 
     procedure Set_File_Info (Self : in out Client_Handler;
                              File_Info : File_Information);
