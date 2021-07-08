@@ -8,8 +8,8 @@ Project Axmpp_Utils is
                        "source/echo_bot",
                        "source/send_message",
                        "source/send_file",
-                       "source/event_bot",
-                       "source/xmpp_sniffer"
+                       "source/event_bot"
+                       --  "source/xmpp_sniffer"
                       );
   for Object_Dir use ".objs";
   for Exec_Dir use "bin";
@@ -21,7 +21,7 @@ Project Axmpp_Utils is
                 "send_message.adb",
                 "send_file.adb",
                 "event_bot.adb",
-                "xmpp_sniffer.adb",
+                --  "xmpp_sniffer.adb",
                 "uploader.adb"
                );
 
