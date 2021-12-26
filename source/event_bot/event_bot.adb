@@ -29,7 +29,6 @@ with Ada.Environment_Variables;
 
 with Event_Sessions;
 with Event_Handlers;
-with XMPP.Sessions;
 with XMPP.Logger;
 
 with Configs;
@@ -99,7 +98,7 @@ begin
     Put_Line ("Config loaded.");
 
     XMPP.Logger.Enable_Debug;
-    XMPP.Sessions.Initialize;
+    Session.Initialize;
 
     Session.Set_Stream_Handler (Handler);
     Handler.Set_Session_Object (Session);

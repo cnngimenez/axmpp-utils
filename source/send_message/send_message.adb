@@ -41,7 +41,6 @@
 ------------------------------------------------------------------------------
 with Client;
 with Client_Handlers;
-with XMPP.Sessions;
 with XMPP.Logger;
 
 with Ada.Text_IO;
@@ -66,8 +65,8 @@ procedure Send_Message is
         return To_Universal_String
           (To_Wide_Wide_String (S));
     end S2Us;
-    
-    Home_Path : String := Ada.Environment_Variables.Value ("HOME");
+
+    Home_Path : constant String := Ada.Environment_Variables.Value ("HOME");
     Config : Configs.Config_Type;
     S : constant not null Client.Session_Access := new Client.Session;
     H : constant not null Client_Handlers.Client_Handler_Access
@@ -95,7 +94,7 @@ begin
     H.Set_To_JID (Send_To);
 
     XMPP.Logger.Enable_Debug;
-    XMPP.Sessions.Initialize;
+    S.Initialize;
 
     S.Set_Stream_Handler (H);
     H.Set_Session_Object (S);

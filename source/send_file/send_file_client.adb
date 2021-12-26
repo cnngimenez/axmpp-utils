@@ -42,9 +42,8 @@
 package body Send_File_Client is
 
     procedure End_Task (Self : in out Session) is
-        use XMPP.Sessions;
     begin
-        Self.Abort_Connection;
+        Self.Disconnect;
     end End_Task;
 
     procedure Test (X : Session) is

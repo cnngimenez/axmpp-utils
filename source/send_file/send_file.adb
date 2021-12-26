@@ -41,7 +41,6 @@
 ------------------------------------------------------------------------------
 with Send_File_Client;
 with Send_File_Handlers.Handlers;
-with XMPP.Sessions;
 with XMPP.Logger;
 
 with Ada.Environment_Variables;
@@ -133,6 +132,11 @@ begin
 
     --  TODO Check file existence...
 
+    declare
+        Test : String := Get_Line;
+        pragma Unreferenced (Test);
+    begin null; end;
+
     Put_Line ("Loading config.");
     Config.Load (Home_Path & "/.config/axmpp-utils/connection.cfg");
     H.Set_Config (Config);
@@ -141,7 +145,7 @@ begin
     H.Set_Send_List (Send_List);
 
     XMPP.Logger.Enable_Debug;
-    XMPP.Sessions.Initialize;
+    S.Initialize;
 
     S.Set_Stream_Handler (H);
     H.Set_Session_Object (S);

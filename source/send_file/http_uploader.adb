@@ -111,6 +111,16 @@ package body HTTP_Uploader is
         --      Put_Line ("Uploading " & Sent'Image & " of " & Total'Image);
         --  end Show_Progress;
 
+        procedure Show_Stream (Sea : Stream_Element_Array) is
+            Element : Stream_Element;
+            Last : constant Stream_Element_Offset := Sea'Last;
+        begin
+            for C in Sea'Range loop
+                Element := Sea (C);
+                Put (C'Image & "/" & Last'Image & ":" & Element'Image & "|");
+            end loop;
+        end Show_Stream;
+
         Connection : Client.HTTP_Connection;
         Rdata : Response.Data;
         Header_List : Client.Header_List;
@@ -163,6 +173,8 @@ package body HTTP_Uploader is
         Check_Certificate (Client.Get_Certificate (Connection));
 
         Client.Close (Connection);
+
+        --  Show_Stream (Stream_Array);
         Close (File);
     exception
     when Errors : others =>

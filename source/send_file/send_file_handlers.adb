@@ -70,13 +70,17 @@ package body Send_File_Handlers is
     procedure Next_File (Self : in out Client_Handler) is
         File_Info : File_Information;
     begin
+        Put_Line ("> Next file. Current_index: "
+                    & Self.Data.Current_Index'Wide_Wide_Image);
         if Self.There_Is_Next_File then
             Self.Data.Current_Index := Self.Data.Current_Index + 1;
 
             File_Info := Self.Data.Send_List.Get_File_Information
               (Self.Data.Current_Index);
 
-            Self.Set_File_Info (File_Info);
+            Self.Data.File_Info := File_Info;
+        else
+            Put_Line ("No more file_info!");
         end if;
     end Next_File;
 
@@ -130,9 +134,9 @@ package body Send_File_Handlers is
                               Put_URL, Get_URL : Universal_String) is
     begin
         Put_Line ("  Uploading file to Put URL.");
-        HTTP_Uploader.Upload_File (Put_URL,
-                                   Self.Data.File_Info.Get_Filepath,
-                                   Self.Data.File_Info.Get_Content_Type);
+        --  HTTP_Uploader.Upload_File (Put_URL,
+        --                             Self.Data.File_Info.Get_Filepath,
+        --                             Self.Data.File_Info.Get_Content_Type);
 
         Put_Line ("  Sending message to JID.");
         Self.Send_Messages (Get_URL);
