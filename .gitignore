@@ -2,3 +2,5 @@
 #*
 .objs/**
 bin/
+*.ali
+config/**
