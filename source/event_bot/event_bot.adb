@@ -42,27 +42,7 @@ with Event_Console.Commands;
 
 procedure Event_Bot is
 
-    function Get_Message (Line : Universal_String) return Universal_String;
-    function Get_To (Line : Universal_String) return Universal_String;
     function S2Us (S : String) return Universal_String;
-
-    function Get_Message (Line : Universal_String) return Universal_String is
-    begin
-        if Line.Starts_With ("to=") then
-            return Line.Tail_From (Index (Line, " ") + 1);
-        else
-            return Line;
-        end if;
-    end Get_Message;
-
-    function Get_To (Line : Universal_String) return Universal_String is
-    begin
-        if Line.Starts_With ("to=") then
-            return Line.Slice (4, Index (Line, " ") - 1);
-        else
-            return Empty_Universal_String;
-        end if;
-    end Get_To;
 
     function S2Us (S : String) return Universal_String is
     begin

@@ -35,7 +35,7 @@ package body Event_Console.Commands is
 
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
-        Splitted_Arguments : Universal_String_Vector :=
+        Splitted_Arguments : constant Universal_String_Vector :=
           Self.Arguments.Split (Lf);
         I : Positive := 1;
         Length : constant Natural := Splitted_Arguments.Length;
@@ -65,7 +65,7 @@ package body Event_Console.Commands is
 
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
-        Splitted_Arguments : Universal_String_Vector :=
+        Splitted_Arguments : constant Universal_String_Vector :=
           Self.Arguments.Split (Lf);
         I : Positive := 1;
         Length : constant Natural := Splitted_Arguments.Length;
