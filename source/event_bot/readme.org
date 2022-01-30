@@ -1,0 +1,59 @@
+* Event Bot
+A bot that receives commands from the user through a FIFO pipe.
+
+The bot works as follows:
+
+1. It loads the =~/.config/axmpp-utils/connection.cfg= for the XMPP account and server.
+2. It connects to the server and open the XML stream. Authenticates and leave the stream ready (no status or presences are sent).
+3. Open the input pipe and output file.
+4. Wait for the user input.
+5. The user enters a command.
+6. The bot parse it and send the proper XML stanza/s.
+7. Go to 4 unless the command orders to end the bot program.
+
+This way, the authentication is done once and the user can send any command during a session. The output is flushed every time an XML stanza is received, thus running ~cat output_file~ would work at anytime.
+
+* Command syntax
+The command syntax are verbose in order to understand them better. There is no short version nor special symbols except those whith widely known semantic. For instance, bot commands start with the "bot:" prefix, no special symbol are defined (i.e. "!", "#", ">", "~", etc.). It is not our intention to make it efficient nor agile, just to be readable and easy to escalate. The input can be provided by a human or a program, and other programs can be used to make the commands easy to write.
+
+The syntax is divided into lines. The first line is the command name, the next lines are the command parameter, and the last line shoud be the "end command" string. Parameters are red until the end string.
+
+#+BEGIN_SRC text
+  command name
+  param1=value 1
+  param2=value 2
+  data=
+  long data parameter...
+  with multiple lines
+  end command
+#+END_SRC
+
+For example:
+
+#+BEGIN_SRC text
+  send message
+  to=romeo@montesque.lit
+  data=
+  Hi Romeo!
+  How are you?
+  end command
+#+END_SRC
+
+To send a more complex message for full control of the stream ~send xml~ can be sent. For instance, to send a Disco Query (Example 1 from XEP-0030):
+
+#+BEGIN_SRC text
+  send xml
+  data=
+  <iq type='get'
+    from='romeo@montague.net/orchard'
+    to='plays.shakespeare.lit'
+    id='info1'>
+    <query xmlns='http://jabber.org/protocol/disco#info'/>
+  </iq>
+  end command
+#+END_SRC
+
+** TODO Command for the bot itself or "Bot commands"
+We call "Bot commands" to designed commands that configure the program behaviour. For example, a command can set a default JID destination for the ~send message~ command, another one can be used to show the received XML in real-time.
+
+The syntax for all bot commands starts with the ~bot:~ prefix, a space and then the bot command. For instance, ~bot: output received stanzas~ to set the bot to save all the received stanzas.

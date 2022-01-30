@@ -38,6 +38,8 @@ use Pipe_Manager;
 with League.Strings;
 use League.Strings;
 
+with Event_Console.Commands;
+
 procedure Event_Bot is
 
     function Get_Message (Line : Universal_String) return Universal_String;
@@ -77,8 +79,10 @@ procedure Event_Bot is
 
     Send_To : Universal_String;
 
-    To, Line : Universal_String;
-    Bye_Text : constant Universal_String := S2Us ("bye");
+    Current_Command : Event_Console.Commands.Command;
+    Command_String, Line : Universal_String;
+    End_Command_String : constant Universal_String := S2Us ("end command");
+
     Output_Pipe, Input_Pipe : Pipe_Type;
 
     Startup_Pipe_Message : constant String := "Starting main loop...";
@@ -125,15 +129,15 @@ begin
 
     while not Session.Has_Ended loop
         Line := Input_Pipe.Attend_Pipe;
+        Command_String.Append (Line);
 
-        To := Get_To (Line);
-        if To.Is_Empty then
-            Session.Send_Message (Line);
-        else
-            Session.Send_Message (To, Get_Message (Line));
+        if Line = End_Command_String then
+            Current_Command.Initialize (Command_String);
+            Current_Command.Run (Session);
+            Command_String.Clear;
         end if;
 
-        exit when Line = Bye_Text;
+        exit when Current_Command.Is_Name (Event_Console.Commands.End_Bot);
     end loop;
 
     Put_Line ("End");
