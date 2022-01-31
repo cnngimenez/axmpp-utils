@@ -55,6 +55,26 @@ package body Pipe_Manager is
         return Pipe.Last_Message;
     end Attend_Pipe;
 
+    procedure Create_Pipe (Pipe : Pipe_Type) is
+        Pipe_Cname : constant char_array := To_C (To_String (Pipe.Path),
+                                                  True);
+        File : File_Type;
+    begin
+        if Ada.Directories.Exists (To_String (Pipe.Path)) then
+            --  The file already exists... use it: just return.
+            return;
+        end if;
+
+        if Pipe.Direction = Input_Only then
+            if Mkfifo (Pipe_Cname, 8#777#) /= 0 then
+                raise Pipe_Creation_Error;
+            end if;
+        elsif Pipe.Direction = Output_Only then
+            Open (File, Append_File, To_String (Pipe.Path));
+            Close (File);
+        end if;
+    end Create_Pipe;
+
     function Date_String return String is
         use Ada.Calendar;
         use Ada.Calendar.Formatting;
@@ -82,18 +102,13 @@ package body Pipe_Manager is
     end Get_Path;
 
     procedure Initialize (Pipe : in out Pipe_Type; Path : String;
-                         Direction : Direction_Type := Input_Only) is
-        Pipe_Cname : constant char_array := To_C (Path, True);
+                          Direction : Direction_Type := Input_Only) is
     begin
         Pipe.Path := To_Unbounded_String (Path);
         Pipe.Last_Message := To_Unbounded_String ("");
         Pipe.Direction := Direction;
 
-        if not Ada.Directories.Exists (To_String (Pipe.Path)) then
-            if Mkfifo (Pipe_Cname, 8#777#) /= 0 then
-                raise Pipe_Creation_Error;
-            end if;
-        end if;
+        Pipe.Create_Pipe;
     end Initialize;
 
     function Read_Message (File : File_Type) return Unbounded_String is

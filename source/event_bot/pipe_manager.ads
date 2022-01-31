@@ -70,4 +70,7 @@ private
 
     function S2Us (S : String) return Universal_String;
 
+    procedure Create_Pipe (Pipe : Pipe_Type);
+    --  Create the file or FIFO pipe (depending on the direction) if it does
+    --  not exists.
 end Pipe_Manager;
