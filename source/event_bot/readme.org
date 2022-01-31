@@ -13,6 +13,31 @@ The bot works as follows:
 
 This way, the authentication is done once and the user can send any command during a session. The output is flushed every time an XML stanza is received, thus running ~cat output_file~ would work at anytime.
 
+* Usage and program arguments
+
+Create a file at =~/.config/axmpp-utils/connection.cfg= with the following syntax:
+
+#+BEGIN_SRC text
+  username@serverhost.org
+  username
+  serverhost.org
+  password
+  resource_name
+#+END_SRC
+
+Then, create a pile with the shell command:
+
+: mkfifo eventbot_input
+
+Call the event bot:
+
+: bin/event_bot myJID@serverhost.org ./eventbot_input ./eventbot_output
+
+** Synopsis
+The command synopsis is:
+
+: bin/event_bot JID input_pipefile output_pipefile
+
 * Command syntax
 The command syntax are verbose in order to understand them better. There is no short version nor special symbols except those whith widely known semantic. For instance, bot commands start with the "bot:" prefix, no special symbol are defined (i.e. "!", "#", ">", "~", etc.). It is not our intention to make it efficient nor agile, just to be readable and easy to escalate. The input can be provided by a human or a program, and other programs can be used to make the commands easy to write.
 

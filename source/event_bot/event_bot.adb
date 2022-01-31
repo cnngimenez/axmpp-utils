@@ -21,6 +21,7 @@
 
 with Ada.Text_IO;
 use Ada.Text_IO;
+with Ada.Wide_Wide_Text_IO;
 with Ada.Command_Line;
 use Ada.Command_Line;
 with Ada.Characters.Conversions;
@@ -66,12 +67,15 @@ procedure Event_Bot is
     Output_Pipe, Input_Pipe : Pipe_Type;
 
     Startup_Pipe_Message : constant String := "Starting main loop...";
+    Dry_Run : Boolean := False;
 begin
     if Argument_Count < 3 then
         Put_Line ("Synopsis:");
         Put_Line ("    bin/event_bot JID input_pipefile output_pipefile ");
         New_Line;
-        Put_Line ("Send messages to the given JID.");
+        Put_Line ("Connect to the configured XMPP account and wait for " &
+                    "commands from the input_pipefile.");
+        Put_Line ("See source/event_bot/readme.org for more information.");
         return;
     end if;
 
@@ -80,6 +84,10 @@ begin
     Config.Load (Home_Path & "/.config/axmpp-utils/connection.cfg");
     Handler.Set_Config (Config);
     Put_Line ("Config loaded.");
+
+    if Argument_Count >= 4 and then Argument (4) = "dry-run" then
+        Dry_Run := True;
+    end if;
 
     XMPP.Logger.Enable_Debug;
     Session.Initialize;
@@ -98,26 +106,35 @@ begin
     Session.Set_To_JID (Send_To);
     Handler.Set_To_JID (Send_To);
 
-    Put_Line ("Opening...");
-    Session.Open;
+    if Dry_Run then
+        Put_Line ("Session: Opening not possible: dry run is in effect.");
+    else
+        Put_Line ("Session: Opening...");
+        Session.Open;
+    end if;
 
     Input_Pipe.Initialize (Argument (2), Input_Only);
+    Put_Line ("Input pipe: " & Argument (2));
     Output_Pipe.Initialize (Argument (3), Output_Only);
+    Put_Line ("Output file: " & Argument (3));
 
     Handler.Set_Output_Pipe (Output_Pipe);
     Output_Pipe.Write_Message (Startup_Pipe_Message);
 
     while not Session.Has_Ended loop
+        Ada.Wide_Wide_Text_IO.Put_Line ("Input pipe: waiting for input");
         Line := Input_Pipe.Attend_Pipe;
+        Ada.Wide_Wide_Text_IO.Put_Line ("Input pipe> " &
+                                          To_Wide_Wide_String (Line));
         Command_String.Append (Line);
 
-        if Line = End_Command_String then
-            Current_Command.Initialize (Command_String);
-            Current_Command.Run (Session);
-            Command_String.Clear;
-        end if;
+        --  if Line = End_Command_String then
+        --      Current_Command.Initialize (Command_String);
+        --      Current_Command.Run (Session, Output_Pipe);
+        --      Command_String.Clear;
+        --  end if;
 
-        exit when Current_Command.Is_Name (Event_Console.Commands.End_Bot);
+        exit when Current_Command.Is_Name (Event_Console.Commands.Bot_End);
     end loop;
 
     Put_Line ("End");
