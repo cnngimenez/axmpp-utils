@@ -22,10 +22,15 @@
 with League.Strings;
 use League.Strings;
 with Event_Sessions;
+with Pipe_Manager;
 
 --  These are the command implementations.
 package Event_Console.Implementations is
-    procedure End_Bot;
+    procedure Bot_End;
+    procedure Bot_Is_Connected
+      (Session : not null Event_Sessions.Session_Access;
+       Output_Pipe : in out Pipe_Manager.Pipe_Type);
+
     procedure Send_Message (Session : not null Event_Sessions.Session_Access;
                             Jid_To : Universal_String;
                             Message : Universal_String);

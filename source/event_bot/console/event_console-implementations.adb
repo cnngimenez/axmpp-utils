@@ -21,10 +21,24 @@
 
 package body Event_Console.Implementations is
 
-    procedure End_Bot is
+    procedure Bot_End is
     begin
         null;
-    end End_Bot;
+    end Bot_End;
+
+    procedure Bot_Is_Connected
+      (Session : not null Event_Sessions.Session_Access;
+       Output_Pipe : in out Pipe_Manager.Pipe_Type) is
+    begin
+        Output_Pipe.Write_Message (String'("User: bot:is connected"));
+        if Session.Is_TLS_Established then
+            Output_Pipe.Write_Message
+              (String'("Bot answer: TLS established."));
+        else
+            Output_Pipe.Write_Message
+              (String'("Bot answer: TLS not established."));
+        end if;
+    end Bot_Is_Connected;
 
     procedure Send_Message (Session : not null Event_Sessions.Session_Access;
                             Jid_To : Universal_String;

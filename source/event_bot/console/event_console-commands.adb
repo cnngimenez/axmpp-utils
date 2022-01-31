@@ -211,11 +211,14 @@ package body Event_Console.Commands is
     end Nametype_To_Namestring;
 
     procedure Run (Self : Command;
-                   Session : not null Event_Sessions.Session_Access) is
+                   Session : not null Event_Sessions.Session_Access;
+                   Output_Pipe : in out Pipe_Manager.Pipe_Type) is
         use Event_Console.Implementations;
     begin
-        if Self.Get_Name = End_Bot then
-            End_Bot;
+        if Self.Get_Name = Bot_End then
+            Bot_End;
+        elsif Self.Get_Name = Bot_Is_Connected then
+            Bot_Is_Connected (Session, Output_Pipe);
         elsif Self.Get_Name = Send_Message then
             Send_Message (Session,
                           Self.Get_Argument ("to"),

@@ -22,6 +22,7 @@
 with League.Strings;
 use League.Strings;
 with Event_Sessions;
+with Pipe_Manager;
 
 --  Command type objects to store any command inputted.
 --
@@ -74,7 +75,8 @@ package Event_Console.Commands is
                                     return Universal_String;
 
     procedure Run (Self : Command;
-                   Session : not null Event_Sessions.Session_Access);
+                   Session : not null Event_Sessions.Session_Access;
+                   Output_Pipe : in out Pipe_Manager.Pipe_Type);
 
 private
     type Command is tagged record
