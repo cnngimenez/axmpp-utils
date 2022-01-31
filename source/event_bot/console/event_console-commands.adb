@@ -170,7 +170,7 @@ package body Event_Console.Commands is
         --  The Name in lowercase and spaces instead of symbols.
 
         Underscore_To_Space_Map : constant Wide_Wide_Character_Mapping :=
-          To_Mapping ("_.", "  ");
+          To_Mapping ("_.:", "   ");
     begin
         --  Prepare the name string: convert to lowercase and replace symbols
         Translate (Search_Name, Lower_Case_Map);

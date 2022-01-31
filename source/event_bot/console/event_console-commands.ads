@@ -31,7 +31,12 @@ package Event_Console.Commands is
 
     type Command is tagged private;
 
-    type Name_Type is (Send_Message, End_Bot, Unknown);
+    type Name_Type is (Send_Message,
+                       --  Bot commands
+                       Bot_Is_Connected,
+                       Bot_End,
+                       --  Misc
+                       Unknown);
 
     procedure Initialize (Self : in out Command;
                           Command_String : Universal_String);
