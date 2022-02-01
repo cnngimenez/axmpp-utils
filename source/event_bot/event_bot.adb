@@ -26,6 +26,7 @@ with Ada.Command_Line;
 use Ada.Command_Line;
 with Ada.Characters.Conversions;
 use Ada.Characters.Conversions;
+with Ada.Characters.Wide_Wide_Latin_1;
 with Ada.Environment_Variables;
 
 with Event_Sessions;
@@ -68,6 +69,9 @@ procedure Event_Bot is
 
     Startup_Pipe_Message : constant String := "Starting main loop...";
     Dry_Run : Boolean := False;
+
+    Lf : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
 begin
     if Argument_Count < 3 then
         Put_Line ("Synopsis:");
@@ -121,18 +125,24 @@ begin
     Handler.Set_Output_Pipe (Output_Pipe);
     Output_Pipe.Write_Message (Startup_Pipe_Message);
 
+    Command_String.Clear;
     while not Session.Has_Ended loop
         Ada.Wide_Wide_Text_IO.Put_Line ("Input pipe: waiting for input");
         Line := Input_Pipe.Attend_Pipe;
         Ada.Wide_Wide_Text_IO.Put_Line ("Input pipe> " &
                                           To_Wide_Wide_String (Line));
         Command_String.Append (Line);
+        Command_String.Append (Lf);
 
-        --  if Line = End_Command_String then
-        --      Current_Command.Initialize (Command_String);
-        --      Current_Command.Run (Session, Output_Pipe);
-        --      Command_String.Clear;
-        --  end if;
+        if Line = End_Command_String then
+            Put_Line ("Processing command...");
+            Current_Command.Initialize (Command_String);
+            Put_Line ("Current command:" &
+                        Event_Console.Commands.Name_Type'Image
+                          (Current_Command.Get_Name));
+            Current_Command.Run (Session, Output_Pipe);
+            Command_String.Clear;
+        end if;
 
         exit when Current_Command.Is_Name (Event_Console.Commands.Bot_End);
     end loop;

@@ -131,13 +131,25 @@ package body Event_Console.Commands is
     procedure Initialize (Self : in out Command;
                           Command_String : Universal_String) is
         Name, Arguments : Universal_String;
-        Name_Ending : Positive;
+        Name_Ending : Natural;
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
     begin
+        --  Retrive the name from the command string.
         Name_Ending := Command_String.Index (Lf);
-        Name := Command_String.Head_To (Name_Ending);
-        Arguments := Command_String.Tail_From (Name_Ending + 1);
+
+        if Name_Ending = 0 then
+            --  Malformed command.
+            Self.Name := Unknown;
+            Self.Arguments := Empty_Universal_String;
+            return;
+        end if;
+
+        Name := Command_String.Head_To (Name_Ending - 1);
+
+        --  Retrieve the Argument from the command string.
+        Arguments := Command_String.Slice (Name_Ending + 1,
+                                          Command_String.Length);
         --  Remove "end command" & LF string.
         Arguments.Slice (1, Arguments.Length - 12);
 
@@ -176,7 +188,6 @@ package body Event_Console.Commands is
         Translate (Search_Name, Lower_Case_Map);
         Translate (Search_Name, Underscore_To_Space_Map);
         Standard_Name := To_Universal_String (Search_Name);
-
         --  Search which Name_Type enumerate has the same string representation
         while Elt < Name_Type'Last and then
           Nametype_To_Namestring (Elt) /= Standard_Name
