@@ -37,7 +37,8 @@ package Event_Console.Commands is
                        Bot_Is_Connected,
                        Bot_End,
                        --  Misc
-                       Unknown);
+                       Unknown, --  An unknown command name (but well formed)
+                       Malformed_Command);
 
     procedure Initialize (Self : in out Command;
                           Command_String : Universal_String);
@@ -77,6 +78,11 @@ package Event_Console.Commands is
     procedure Run (Self : Command;
                    Session : not null Event_Sessions.Session_Access;
                    Output_Pipe : in out Pipe_Manager.Pipe_Type);
+
+    function To_Universal_String (Self : Command) return Universal_String;
+    function To_Wide_Wide_String (Self : Command) return Wide_Wide_String;
+    --  String representation of the command with all its parts.
+    --  Useful for debugging purposes.
 
 private
     type Command is tagged record

@@ -29,6 +29,8 @@ with Event_Console.Implementations;
 
 package body Event_Console.Commands is
 
+    function S2u (S : String) return Universal_String;
+
     function Get_Argument (Self : Command; Name : Wide_Wide_String)
                           return Universal_String is
         use League.String_Vectors;
@@ -74,14 +76,18 @@ package body Event_Console.Commands is
           To_Universal_String ("data=");
     begin
         --  goto data= parameter
-        Current_Argument := Splitted_Arguments.Element (I);
         while I <= Length and then Current_Argument /= Data_Argument loop
-            I := I + 1;
             Current_Argument := Splitted_Arguments.Element (I);
+            I := I + 1;
         end loop;
 
-        --  Return the rest of the strings joined with LF again.
-        return Splitted_Arguments.Slice (I, Length).Join (Lf);
+        if I <= Length then
+            --  Return the rest of the strings joined with LF again.
+            return Splitted_Arguments.Slice (I, Length).Join (Lf);
+        else
+            --  Not found...
+            return Empty_Universal_String;
+        end if;
     end Get_Data_Argument;
 
     function Get_Name (Self : Command) return Name_Type is
@@ -140,7 +146,7 @@ package body Event_Console.Commands is
 
         if Name_Ending = 0 then
             --  Malformed command.
-            Self.Name := Unknown;
+            Self.Name := Malformed_Command;
             Self.Arguments := Empty_Universal_String;
             return;
         end if;
@@ -149,9 +155,18 @@ package body Event_Console.Commands is
 
         --  Retrieve the Argument from the command string.
         Arguments := Command_String.Slice (Name_Ending + 1,
-                                          Command_String.Length);
+                                           Command_String.Length);
         --  Remove "end command" & LF string.
-        Arguments.Slice (1, Arguments.Length - 12);
+        if Arguments.Length < 12 then
+            --  It does not end in "end command"!
+            Self.Name := Malformed_Command;
+            Self.Arguments := Empty_Universal_String;
+            return;
+        elsif Arguments.Length = 12 then
+            Arguments := Empty_Universal_String;
+        else
+            Arguments.Slice (1, Arguments.Length - 12);
+        end if;
 
         Self.Name := Namestring_To_Nametype (Name);
         Self.Arguments := Arguments;
@@ -188,6 +203,7 @@ package body Event_Console.Commands is
         Translate (Search_Name, Lower_Case_Map);
         Translate (Search_Name, Underscore_To_Space_Map);
         Standard_Name := To_Universal_String (Search_Name);
+
         --  Search which Name_Type enumerate has the same string representation
         while Elt < Name_Type'Last and then
           Nametype_To_Namestring (Elt) /= Standard_Name
@@ -236,5 +252,31 @@ package body Event_Console.Commands is
                           Self.Get_Data_Argument);
         end if;
     end Run;
+
+    function S2u (S : String) return Universal_String is
+    begin
+        return To_Universal_String
+          (Ada.Characters.Conversions.To_Wide_Wide_String (S));
+    end S2u;
+
+    function To_Universal_String (Self : Command) return Universal_String is
+        Name_String : constant Universal_String :=
+          S2u ("--  Command name: ");
+        Argument_String : constant Universal_String :=
+          S2u ("  Arguments: ");
+        Data_String : constant Universal_String :=
+          S2u ("  Data argument: ");
+        Lf : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
+    begin
+        return Name_String & Self.Get_Name & Lf &
+          Argument_String & Self.Arguments & Lf &
+          Data_String & Lf & Self.Get_Data_Argument & Lf;
+    end To_Universal_String;
+
+    function To_Wide_Wide_String (Self : Command) return Wide_Wide_String is
+    begin
+        return To_Wide_Wide_String (Self.To_Universal_String);
+    end To_Wide_Wide_String;
 
 end Event_Console.Commands;
