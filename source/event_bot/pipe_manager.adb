@@ -118,7 +118,7 @@ package body Pipe_Manager is
         Buffer := To_Unbounded_String ("");
 
         loop
-            Get (File, C);
+            Get_Immediate (File, C);
             Append (Buffer, C);
             exit when End_Of_File (File);
         end loop;
