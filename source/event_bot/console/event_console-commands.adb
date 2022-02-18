@@ -57,6 +57,11 @@ package body Event_Console.Commands is
         return Current_Argument.Tail_From (Name'Length + 1);
     end Get_Argument;
 
+    function Get_Argument_Count (Self : Command) return Natural is
+    begin
+        return League.Strings.Count (Self.Arguments, '=');
+    end Get_Argument_Count;
+
     function Get_Arguments (Self : Command) return Universal_String is
     begin
         return Self.Arguments;
@@ -260,18 +265,27 @@ package body Event_Console.Commands is
     end S2u;
 
     function To_Universal_String (Self : Command) return Universal_String is
-        Name_String : constant Universal_String :=
-          S2u ("--  Command name: ");
-        Argument_String : constant Universal_String :=
-          S2u ("  Arguments: ");
-        Data_String : constant Universal_String :=
-          S2u ("  Data argument: ");
+        Parsed_Arguments : Universal_String;
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
     begin
-        return Name_String & Self.Get_Name & Lf &
-          Argument_String & Self.Arguments & Lf &
-          Data_String & Lf & Self.Get_Data_Argument & Lf;
+        for I in 1 .. (Self.Get_Argument_Count - 1) loop
+            Parsed_Arguments := Parsed_Arguments &
+              "    Arguments (" & I'Wide_Wide_Image & ") = """ &
+              Get_Nth_Argument (Self, I) & """";
+        end loop;
+
+        return
+          "--  Command: " & Lf &
+          --  Name
+          "  Name: " & Self.Get_Name & Lf &
+          --  Argument information
+          "  Arguments: """ & Lf & Self.Arguments & """" & Lf &
+          "    Count:" & Self.Get_Argument_Count'Wide_Wide_Image & Lf &
+          Parsed_Arguments &
+          --  Data argument
+          "  Data argument parsed: """
+          & Lf & Self.Get_Data_Argument & """" & Lf;
     end To_Universal_String;
 
     function To_Wide_Wide_String (Self : Command) return Wide_Wide_String is

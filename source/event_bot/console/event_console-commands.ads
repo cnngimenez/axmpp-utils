@@ -66,6 +66,7 @@ package Event_Console.Commands is
 
     function Get_Nth_Argument (Self : Command; N : Positive)
                               return Universal_String;
+    function Get_Argument_Count (Self : Command) return Natural;
 
     --  This is not a function per se. Two or more names are mapped to the same
     --  Name_Type element.
