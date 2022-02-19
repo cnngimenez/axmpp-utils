@@ -214,10 +214,13 @@ package body Event_Console.Commands is
                 Line := Empty_Universal_String;
             end if;
 
-            if Is_Data then
-                Data_Element.Append (Line);
-            else
-                Insert_Oneline_Argument (Line);
+            if not Line.Is_Empty then
+                if Is_Data then
+                    Data_Element.Append (Line);
+                    Data_Element.Append (Lf);
+                else
+                    Insert_Oneline_Argument (Line);
+                end if;
             end if;
         end loop;
 
