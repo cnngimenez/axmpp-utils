@@ -82,3 +82,89 @@ To send a more complex message for full control of the stream ~send xml~ can be 
 We call "Bot commands" to designed commands that configure the program behaviour. For example, a command can set a default JID destination for the ~send message~ command, another one can be used to show the received XML in real-time.
 
 The syntax for all bot commands starts with the ~bot:~ prefix, a space and then the bot command. For instance, ~bot: output received stanzas~ to set the bot to save all the received stanzas.
+
+* Command list
+
+** XMPP Commands
+*** Send message
+Send a message to a single user.
+
+Example:
+#+BEGIN_SRC text
+  send message
+  to=romeo@montesque.lit
+  data=
+  Hi Romeo!
+  How are you?
+  end command
+#+END_SRC
+
+*** TODO Send file
+Send a file to a single user through HTTP Upload.
+
+Example:
+#+BEGIN_SRC text
+  send file
+  to=romeo@montesque.lit
+  file=~/myfile.png
+  end command
+#+END_SRC
+
+*** TODO Send presence
+Send presences changes. Presences like busy, free, chatty, and simmilar ones.
+
+Presence is defined at [[https://xmpp.org/rfcs/rfc6121.html#presence-syntax][RFC6121 Presence Syntax]].
+
+**** Parameters
+- to :: (Optional, default is global presence). Enable direct presence which the user JID specified receives this presence change. If not present, it assumed the presence is global and all users suscribed will receive the presence change.
+  Valid values are bare or full JIDs.
+- show :: (Optional, default is "online") Client consumer data that resumes the presence status of the bot.
+  Valid values are "online", "away", "chat", "xa", "dnd", or any string.
+  The "online" value means no ~<show>~ tag sent to the server.
+- status :: (Optional, default is "") Human readable presence status. A valid value is any string.
+- priority :: (Optional, default is 0) Client consumer integer between -128 to +127. Modifies the priority of the client. See [[https://xmpp.org/rfcs/rfc6121.html#rules][RFC6121 section 8]].
+**** Example
+
+#+BEGIN_SRC text
+  send presence
+  to=romeo@montagne.net/orchard
+  show=xa
+  status=Busy IRL
+  priority=1
+  end command
+#+END_SRC
+
+*** TODO Send stanza
+Send a user XML stanza to the server.
+
+Example:
+#+BEGIN_SRC text
+  send stanza
+  data=
+  <iq type='get'
+    from='romeo@montague.net/orchard'
+    to='plays.shakespeare.lit'
+    id='info1'>
+    <query xmlns='http://jabber.org/protocol/disco#info'/>
+  </iq>
+  end command
+#+END_SRC
+
+** Bot commands 
+*** Bot end
+End connections.
+
+Example:
+#+BEGIN_SRC text
+  bot end
+  end command
+#+END_SRC
+
+*** TODO Bot is connected
+Check if the bot is connected.
+
+Example:
+#+BEGIN_SRC text
+  bot is connected
+  end command
+#+END_SRC
