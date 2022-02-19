@@ -19,8 +19,10 @@
 
 -------------------------------------------------------------------------
 
+with Ada.Containers.Hashed_Maps;
 with League.Strings;
 use League.Strings;
+with League.Strings.Hash;
 with Event_Sessions;
 with Pipe_Manager;
 
@@ -64,8 +66,6 @@ package Event_Console.Commands is
 
     function Get_Data_Argument (Self : Command) return Universal_String;
 
-    function Get_Nth_Argument (Self : Command; N : Positive)
-                              return Universal_String;
     function Get_Argument_Count (Self : Command) return Natural;
 
     --  This is not a function per se. Two or more names are mapped to the same
@@ -86,9 +86,32 @@ package Event_Console.Commands is
     --  Useful for debugging purposes.
 
 private
+    package Argument_Map_Package is new Ada.Containers.Hashed_Maps
+      (Key_Type => Universal_String,
+       Element_Type => Universal_String,
+       Hash => League.Strings.Hash,
+       Equivalent_Keys => "=");
+
+    subtype Argument_Map is Argument_Map_Package.Map;
+
     type Command is tagged record
         Name : Name_Type;
-        Arguments : Universal_String;
+        Arguments : Argument_Map;
     end record;
 
+    procedure Parse_Argument_String (Self : in out Command;
+                                     Arguments : Universal_String);
+    --  Parse the string into the map key-element values.
+    --  Split the string in lines and then in '=' characters to create
+    --  "key=element" patterns. Then, add them to the Self.Arguments map.
+    --  Arguments is a string with multiple "KEY=ELEMENT" & LF lines. The last
+    --  lines is the data argument which starts with "data=" & LF string.
+    --  For example:
+    --  "to=alice@myserver.org
+    --  data=
+    --  Hello Alice,
+    --  How are you?"
+
+    function To_Universal_String (Arguments : Argument_Map)
+                                 return Universal_String;
 end Event_Console.Commands;

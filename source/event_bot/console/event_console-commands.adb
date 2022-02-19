@@ -29,70 +29,32 @@ with Event_Console.Implementations;
 
 package body Event_Console.Commands is
 
-    function S2u (S : String) return Universal_String;
-
     function Get_Argument (Self : Command; Name : Wide_Wide_String)
                           return Universal_String is
-        use League.String_Vectors;
-
-        Lf : constant Wide_Wide_Character :=
-          Ada.Characters.Wide_Wide_Latin_1.LF;
-        Splitted_Arguments : constant Universal_String_Vector :=
-          Self.Arguments.Split (Lf);
-        I : Positive := 1;
-        Length : constant Natural := Splitted_Arguments.Length;
-        Current_Argument : Universal_String;
     begin
-        Current_Argument := Splitted_Arguments.Element (I);
-        while not Current_Argument.Starts_With (Name) and then I <= Length loop
-            I := I + 1;
-            Current_Argument := Splitted_Arguments.Element (I);
-        end loop;
-
-        if I > Length then
-            return Empty_Universal_String;
-        end if;
-
-        --  Return only the argument value
-        return Current_Argument.Tail_From (Name'Length + 1);
+        return Self.Arguments.Element (To_Universal_String (Name));
     end Get_Argument;
 
     function Get_Argument_Count (Self : Command) return Natural is
     begin
-        return League.Strings.Count (Self.Arguments, '=');
+        return Natural (Self.Arguments.Length);
     end Get_Argument_Count;
 
     function Get_Arguments (Self : Command) return Universal_String is
+        Argument_String : Universal_String;
+        Lf : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
+        use Argument_Map_Package;
     begin
-        return Self.Arguments;
+        for Cursor in Self.Arguments.Iterate loop
+            Argument_String := Key (Cursor) & "=" & Element (Cursor) & Lf;
+        end loop;
+        return Argument_String;
     end Get_Arguments;
 
     function Get_Data_Argument (Self : Command) return Universal_String is
-        use League.String_Vectors;
-
-        Lf : constant Wide_Wide_Character :=
-          Ada.Characters.Wide_Wide_Latin_1.LF;
-        Splitted_Arguments : constant Universal_String_Vector :=
-          Self.Arguments.Split (Lf);
-        I : Positive := 1;
-        Length : constant Natural := Splitted_Arguments.Length;
-        Current_Argument : Universal_String;
-        Data_Argument : constant Universal_String :=
-          To_Universal_String ("data=");
     begin
-        --  goto data= parameter
-        while I <= Length and then Current_Argument /= Data_Argument loop
-            Current_Argument := Splitted_Arguments.Element (I);
-            I := I + 1;
-        end loop;
-
-        if I <= Length then
-            --  Return the rest of the strings joined with LF again.
-            return Splitted_Arguments.Slice (I, Length).Join (Lf);
-        else
-            --  Not found...
-            return Empty_Universal_String;
-        end if;
+        return Self.Arguments.Element (To_Universal_String ("data"));
     end Get_Data_Argument;
 
     function Get_Name (Self : Command) return Name_Type is
@@ -106,53 +68,24 @@ package body Event_Console.Commands is
         return To_Universal_String (To_Wide_Wide_String (Self.Name'Image));
     end Get_Name;
 
-    function Get_Nth_Argument (Self : Command; N : Positive)
-                              return Universal_String is
-        Starting, Ending : Natural;
-        I : Natural := N;
-        Lf : constant Wide_Wide_Character :=
-          Ada.Characters.Wide_Wide_Latin_1.LF;
-    begin
-        --  Search for the starting position.
-
-        --  I = 0 means no more new lines!
-        Starting := Index (Self.Arguments, 1, Lf);
-
-        while I > 0 and then Starting > 0 loop
-            Starting := Self.Arguments.Index (Starting, Lf);
-            I := I - 1;
-        end loop;
-
-        if Starting = 0 then
-            --  The nth parameter has not been found, return "".
-            return Empty_Universal_String;
-        end if;
-
-        --  Search for the ending position.
-
-        Ending := Self.Arguments.Index (Starting, Lf);
-        if Ending = 0 then
-            --  No ending new line, just return the last character.
-            Ending := Self.Arguments.Length;
-        end if;
-
-        return Self.Arguments.Slice (Starting, Ending);
-    end Get_Nth_Argument;
-
     procedure Initialize (Self : in out Command;
                           Command_String : Universal_String) is
+        use Argument_Map_Package;
+
         Name, Arguments : Universal_String;
         Name_Ending : Natural;
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
     begin
+        Self.Name := Unknown;
+        Clear (Self.Arguments);
+
         --  Retrive the name from the command string.
         Name_Ending := Command_String.Index (Lf);
 
         if Name_Ending = 0 then
             --  Malformed command.
             Self.Name := Malformed_Command;
-            Self.Arguments := Empty_Universal_String;
             return;
         end if;
 
@@ -165,7 +98,7 @@ package body Event_Console.Commands is
         if Arguments.Length < 12 then
             --  It does not end in "end command"!
             Self.Name := Malformed_Command;
-            Self.Arguments := Empty_Universal_String;
+            Clear (Self.Arguments);
             return;
         elsif Arguments.Length = 12 then
             Arguments := Empty_Universal_String;
@@ -174,15 +107,16 @@ package body Event_Console.Commands is
         end if;
 
         Self.Name := Namestring_To_Nametype (Name);
-        Self.Arguments := Arguments;
+        Parse_Argument_String (Self, Arguments);
     end Initialize;
 
     procedure Initialize (Self : in out Command;
                           Name : Name_Type;
                           Arguments : Universal_String) is
+        --  Arguments has no "end command" string.
     begin
         Self.Name := Name;
-        Self.Arguments := Arguments;
+        Parse_Argument_String (Self, Arguments);
     end Initialize;
 
     function Is_Name (Self : Command; Name : Name_Type) return Boolean is
@@ -242,6 +176,58 @@ package body Event_Console.Commands is
         return To_Universal_String (Namestr);
     end Nametype_To_Namestring;
 
+    procedure Parse_Argument_String (Self : in out Command;
+                                     Arguments : Universal_String) is
+        use League.String_Vectors;
+        use Argument_Map_Package;
+
+        procedure Insert_Oneline_Argument (Line : Universal_String);
+
+        procedure Insert_Oneline_Argument (Line : Universal_String) is
+            Separator_Position : constant Natural := Line.Index ('=');
+            Key, Element : Universal_String;
+        begin
+            if Separator_Position < 1 then
+                return;
+            end if;
+            Key := Line.Head (Separator_Position - 1);
+            Element := Line.Tail_From (Separator_Position + 1);
+
+            Include (Self.Arguments, Key, Element);
+        end Insert_Oneline_Argument;
+
+        Lf : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
+        Splitted_Arguments : constant Universal_String_Vector :=
+          Arguments.Split (Lf);
+        Is_Data : Boolean := False;
+        Line, Data_Element : Universal_String;
+        Data_Argument : constant Universal_String :=
+          To_Universal_String ("data=");
+    begin
+        for I in 1 .. Splitted_Arguments.Length loop
+            Line := Splitted_Arguments.Element (I);
+
+            if Line = Data_Argument then
+                --  Starts the "data=" line...
+                Is_Data := True;
+                Line := Empty_Universal_String;
+            end if;
+
+            if Is_Data then
+                Data_Element.Append (Line);
+            else
+                Insert_Oneline_Argument (Line);
+            end if;
+        end loop;
+
+        if not Data_Element.Is_Empty then
+            Include (Self.Arguments,
+                     To_Universal_String ("data"),
+                     Data_Element);
+        end if;
+    end Parse_Argument_String;
+
     procedure Run (Self : Command;
                    Session : not null Event_Sessions.Session_Access;
                    Output_Pipe : in out Pipe_Manager.Pipe_Type) is
@@ -258,34 +244,37 @@ package body Event_Console.Commands is
         end if;
     end Run;
 
-    function S2u (S : String) return Universal_String is
+    function To_Universal_String (Arguments : Argument_Map)
+                                 return Universal_String is
+        use Argument_Map_Package;
+
+        Lf : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
+        Parsed_Arguments : Universal_String;
     begin
-        return To_Universal_String
-          (Ada.Characters.Conversions.To_Wide_Wide_String (S));
-    end S2u;
+        for I in Arguments.Iterate loop
+            Parsed_Arguments := Parsed_Arguments &
+              "    Arguments (""" & Key (I) &  """) = " &
+              """" & Element (I) & """" & Lf;
+        end loop;
+        return Parsed_Arguments;
+    end To_Universal_String;
 
     function To_Universal_String (Self : Command) return Universal_String is
-        Parsed_Arguments : Universal_String;
         Lf : constant Wide_Wide_Character :=
           Ada.Characters.Wide_Wide_Latin_1.LF;
     begin
-        for I in 1 .. (Self.Get_Argument_Count - 1) loop
-            Parsed_Arguments := Parsed_Arguments &
-              "    Arguments (" & I'Wide_Wide_Image & ") = """ &
-              Get_Nth_Argument (Self, I) & """";
-        end loop;
-
         return
           "--  Command: " & Lf &
           --  Name
           "  Name: " & Self.Get_Name & Lf &
           --  Argument information
-          "  Arguments: """ & Lf & Self.Arguments & """" & Lf &
+          "  Arguments: " & Lf &
           "    Count:" & Self.Get_Argument_Count'Wide_Wide_Image & Lf &
-          Parsed_Arguments &
+          To_Universal_String (Self.Arguments) &
           --  Data argument
-          "  Data argument parsed: """
-          & Lf & Self.Get_Data_Argument & """" & Lf;
+          "  Data argument parsed: " & Lf &
+          """" & Self.Get_Data_Argument & """" & Lf;
     end To_Universal_String;
 
     function To_Wide_Wide_String (Self : Command) return Wide_Wide_String is
