@@ -1,3 +1,26 @@
+--  event_handlers.ads ---
+
+--  Copyright 2022 cnngimenez
+--
+--  Author: cnngimenez
+
+--  This program is free software: you can redistribute it and/or modify
+--  it under the terms of the GNU General Public License as published by
+--  the Free Software Foundation, either version 3 of the License, or
+--  (at your option) any later version.
+
+--  This program is distributed in the hope that it will be useful,
+--  but WITHOUT ANY WARRANTY; without even the implied warranty of
+--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--  GNU General Public License for more details.
+
+--  You should have received a copy of the GNU General Public License
+--  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-------------------------------------------------------------------------
+
+with Ada.Containers.Vectors;
+
 with League.Strings;
 use League.Strings;
 
@@ -13,6 +36,8 @@ with Configs;
 use Configs;
 with Pipe_Manager;
 use Pipe_Manager;
+with Files;
+use Files;
 
 limited with Event_Sessions;
 
@@ -94,10 +119,25 @@ package Event_Handlers is
     procedure Set_Output_Pipe (Self : in out Event_Handler;
                                Pipe : Pipe_Type);
 
+    procedure Add_New_Upload_File (Self : in out Event_Handler;
+                                   File_Data : Files.File_Information;
+                                   Jid_To : Universal_String);
 private
+    type Upload_Type is record
+        File_Data : File_Information;
+        Jid_To : Universal_String;
+        Put_Url : Universal_String;
+        Get_Url : Universal_String;
+    end record;
+
+    package File_Package is new Ada.Containers.Vectors
+      (Index_Type => Positive,
+       Element_Type => Upload_Type);
+
+    subtype File_Vector is File_Package.Vector;
 
     type Event_Handler is limited new XMPP.Stream_Handlers.XMPP_Stream_Handler
-       with
+      with
        record
            Session : access Event_Sessions.Session;
 
@@ -106,6 +146,8 @@ private
            Config : Config_Type;
            Output_Pipe : Pipe_Type;
            Output_Pipe_Set : Boolean := False;
+
+           Upload_Files : File_Vector;
        end record;
 
 end Event_Handlers;

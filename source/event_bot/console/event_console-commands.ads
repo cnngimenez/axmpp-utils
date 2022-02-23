@@ -24,6 +24,7 @@ with League.Strings;
 use League.Strings;
 with League.Strings.Hash;
 with Event_Sessions;
+with Event_Handlers;
 with Pipe_Manager;
 
 --  Command type objects to store any command inputted.
@@ -35,6 +36,7 @@ package Event_Console.Commands is
     type Command is tagged private;
 
     type Name_Type is (Send_Message,
+                       Send_File,
                        --  Bot commands
                        Bot_Is_Connected,
                        Bot_End,
@@ -78,6 +80,7 @@ package Event_Console.Commands is
 
     procedure Run (Self : Command;
                    Session : not null Event_Sessions.Session_Access;
+                   Handler : not null Event_Handlers.Event_Handler_Access;
                    Output_Pipe : in out Pipe_Manager.Pipe_Type);
 
     function To_Universal_String (Self : Command) return Universal_String;

@@ -233,6 +233,7 @@ package body Event_Console.Commands is
 
     procedure Run (Self : Command;
                    Session : not null Event_Sessions.Session_Access;
+                   Handler : not null Event_Handlers.Event_Handler_Access;
                    Output_Pipe : in out Pipe_Manager.Pipe_Type) is
         use Event_Console.Implementations;
     begin
@@ -244,6 +245,10 @@ package body Event_Console.Commands is
             Send_Message (Session,
                           Self.Get_Argument ("to"),
                           Self.Get_Data_Argument);
+        elsif Self.Get_Name = Send_File then
+            Send_File (Session, Handler, Output_Pipe,
+                       Self.Get_Argument ("to"),
+                       Self.Get_Argument ("file"));
         end if;
     end Run;
 

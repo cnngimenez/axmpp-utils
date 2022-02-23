@@ -84,8 +84,11 @@ We call "Bot commands" to designed commands that configure the program behaviour
 The syntax for all bot commands starts with the ~bot:~ prefix, a space and then the bot command. For instance, ~bot: output received stanzas~ to set the bot to save all the received stanzas.
 
 * Command list
+This section describes different commands implemented in the bot.
 
 ** XMPP Commands
+The following are XMPP related commands supported by the event bot.
+
 *** Send message
 Send a message to a single user.
 

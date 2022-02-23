@@ -22,6 +22,7 @@
 with XMPP.Objects;
 pragma Warnings (Off, XMPP.Objects);
 with XMPP.Messages;
+with XMPP.IQ_Requests;
 
 package body Event_Sessions is
 
@@ -57,6 +58,19 @@ package body Event_Sessions is
     begin
         Send_Message (Self, To_Universal_String (Text));
     end Send_Message;
+
+    procedure Send_Upload_IQ_Request (Self : in out Session;
+                                      File_Data : File_Information) is
+        Request : XMPP.IQ_Requests.XMPP_IQ_Request;
+    begin
+        Request.Set_To (To_Universal_String ("upload.") & Self.Config.Host);
+        Request.Set_From (Self.Config.JID);
+        Request.Set_Filename (File_Data.Get_Name);
+        Request.Set_Size (File_Data.Get_Size);
+        Request.Set_Content_Type (File_Data.Get_Content_Type);
+
+        Self.Send_Object (Request);
+    end Send_Upload_IQ_Request;
 
     procedure Set_Config (Self : in out Session; Config : Config_Type) is
     begin

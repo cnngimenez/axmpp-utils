@@ -22,6 +22,7 @@
 with League.Strings;
 use League.Strings;
 with Event_Sessions;
+with Event_Handlers;
 with Pipe_Manager;
 
 --  These are the command implementations.
@@ -34,5 +35,11 @@ package Event_Console.Implementations is
     procedure Send_Message (Session : not null Event_Sessions.Session_Access;
                             Jid_To : Universal_String;
                             Message : Universal_String);
+    procedure Send_File
+      (Session : not null Event_Sessions.Session_Access;
+       Handler : not null Event_Handlers.Event_Handler_Access;
+       Output_Pipe : in out Pipe_Manager.Pipe_Type;
+       Jid_To : Universal_String;
+       Path : Universal_String);
 
 end Event_Console.Implementations;

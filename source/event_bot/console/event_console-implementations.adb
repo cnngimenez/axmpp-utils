@@ -19,7 +19,13 @@
 
 -------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;
+with Files;
+use Files;
+
 package body Event_Console.Implementations is
+
+    function To_Path_String (S : Universal_String) return String;
 
     procedure Bot_End is
     begin
@@ -40,6 +46,27 @@ package body Event_Console.Implementations is
         end if;
     end Bot_Is_Connected;
 
+    procedure Send_File
+      (Session : not null Event_Sessions.Session_Access;
+       Handler : not null Event_Handlers.Event_Handler_Access;
+       Output_Pipe : in out Pipe_Manager.Pipe_Type;
+       Jid_To : Universal_String;
+       Path : Universal_String) is
+        File_Data : File_Information;
+        Path_Str : constant String := To_Path_String (Path);
+    begin
+        File_Data := Create (Path_Str);
+        if not File_Data.File_Exists then
+            Output_Pipe.Write_Message
+              (String'("Bot error: file " & Path_Str
+                         & " not found and cannot be uploaded."));
+            return;
+        end if;
+
+        Session.Send_Upload_IQ_Request (File_Data);
+        Handler.Add_New_Upload_File (File_Data, Jid_To);
+    end Send_File;
+
     procedure Send_Message (Session : not null Event_Sessions.Session_Access;
                             Jid_To : Universal_String;
                             Message : Universal_String) is
@@ -50,5 +77,25 @@ package body Event_Console.Implementations is
             Session.Send_Message (Jid_To, Message);
         end if;
     end Send_Message;
+
+    function To_Path_String (S : Universal_String) return String is
+        use Ada.Strings.Unbounded;
+
+        Wws : constant Wide_Wide_String := To_Wide_Wide_String (S);
+        Amount : constant Natural := Wws'Length;
+        Temp_Str : Unbounded_String;
+        Wwc : Wide_Wide_Character;
+        C : Character;
+    begin
+        for I in Natural range 1 .. Amount loop
+            Wwc := Wws (I);
+            if Wide_Wide_Character'Pos (Wwc) < 256 then
+                C := Character'Val (Wide_Wide_Character'Pos (Wwc));
+                Append (Temp_Str, C);
+            end if;
+        end loop;
+
+        return To_String (Temp_Str);
+    end To_Path_String;
 
 end Event_Console.Implementations;

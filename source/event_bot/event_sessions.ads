@@ -19,6 +19,8 @@
 
 -------------------------------------------------------------------------
 
+with Files;
+use Files;
 with Configs;
 use Configs;
 
@@ -51,6 +53,12 @@ package Event_Sessions is
     procedure Ended (Self : in out Session);
     --  Set the session as ended!
     --  This is used by the Event_Handler.
+
+    procedure Send_Upload_IQ_Request (Self : in out Session;
+                                      File_Data : File_Information);
+    --  Send an IQ Request for a slot (URL) to upload a file.
+    --  The Event_Handler will handle the answer.
+
 private
 
     type Session is limited new XMPP.Sessions.XMPP_Session

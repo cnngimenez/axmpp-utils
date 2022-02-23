@@ -135,7 +135,7 @@ begin
         if Dry_Run then
             Put_Line ("Command not executed due to dry run.");
         else
-            Current_Command.Run (Session, Output_Pipe);
+            Current_Command.Run (Session, Handler, Output_Pipe);
         end if;
         Command_String.Clear;
 

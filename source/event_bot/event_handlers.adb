@@ -53,6 +53,17 @@ package body Event_Handlers is
 
     procedure Put_Roster (Iq : XMPP_Roster);
 
+    procedure Add_New_Upload_File (Self : in out Event_Handler;
+                                   File_Data : Files.File_Information;
+                                   Jid_To : Universal_String) is
+        Upload_Data : Upload_Type;
+    begin
+        Upload_Data.File_Data := File_Data;
+        Upload_Data.Jid_To := Jid_To;
+
+        Self.Upload_Files.Append (Upload_Data);
+    end Add_New_Upload_File;
+
     ---------------------------
     --  Bind_Resource_State  --
     ---------------------------
