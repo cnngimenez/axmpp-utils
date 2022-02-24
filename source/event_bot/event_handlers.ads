@@ -31,6 +31,7 @@ with XMPP.Stream_Features;
 with XMPP.IQS;
 with XMPP.Messages;
 with XMPP.Rosters;
+with XMPP.IQ_Uploads;
 
 with Configs;
 use Configs;
@@ -88,6 +89,10 @@ package Event_Handlers is
       (Self : in out Event_Handler;
        IQ   : XMPP.IQS.XMPP_IQ'Class);
 
+    overriding procedure IQ_Upload
+      (Self : in out Event_Handler;
+       IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class);
+
     overriding procedure Roster
       (Self : in out Event_Handler;
        Data : XMPP.Rosters.XMPP_Roster'Class);
@@ -126,8 +131,8 @@ private
     type Upload_Type is record
         File_Data : File_Information;
         Jid_To : Universal_String;
-        Put_Url : Universal_String;
-        Get_Url : Universal_String;
+        --  Put_Url : Universal_String;
+        --  Get_Url : Universal_String;
     end record;
 
     package File_Package is new Ada.Containers.Vectors

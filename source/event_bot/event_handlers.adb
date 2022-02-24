@@ -39,6 +39,7 @@ with XMPP.Roster_Items;
 --  with XMPP.Messages;
 with XMPP.Logger;
 use XMPP.Logger;
+with HTTP_Uploader;
 
 package body Event_Handlers is
 
@@ -137,6 +138,27 @@ package body Event_Handlers is
         end if;
 
     end IQ;
+
+    overriding procedure IQ_Upload
+      (Self : in out Event_Handler;
+       IQ_Upload : XMPP.IQ_Uploads.XMPP_IQ_Upload'Class) is
+        Upload_Data : Upload_Type;
+        --  Put_URL : constant Universal_String := IQ_Upload.Get_Put_URL;
+        --  Get_Url : constant Universal_String := IQ_Upload.Get_Put_URL;
+    begin
+        if Self.Upload_Files.Is_Empty then
+            return;
+        end if;
+
+        Upload_Data := Self.Upload_Files.First_Element;
+
+        HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
+                                   Upload_Data.File_Data.Get_Filepath,
+                                   Upload_Data.File_Data.Get_Content_Type);
+        Self.Session.Send_Get_Url (IQ_Upload.Get_Get_URL,
+                                   Upload_Data.Jid_To);
+        Self.Upload_Files.Delete_First;
+    end IQ_Upload;
 
     overriding procedure Message
       (Self : in out Event_Handler;

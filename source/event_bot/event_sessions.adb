@@ -22,6 +22,7 @@
 with XMPP.Objects;
 pragma Warnings (Off, XMPP.Objects);
 with XMPP.Messages;
+with XMPP.Messages.XMPP_File_Messages;
 with XMPP.IQ_Requests;
 
 package body Event_Sessions is
@@ -35,6 +36,21 @@ package body Event_Sessions is
 
     function Has_Ended (Self : in out Session) return Boolean is
       (Self.Ended);
+
+    procedure Send_Get_Url (Self : in out Session;
+                            File_Get_Url : Universal_String;
+                            To_JID : Universal_String) is
+        use XMPP.Messages.XMPP_File_Messages;
+        Message : XMPP_File_Message;
+    begin
+        Message.Set_Type (XMPP.Chat);
+        Message.Set_Body (File_Get_Url);
+        Message.Set_To (To_JID);
+        Message.Set_From (Self.Config.JID);
+        Message.Set_File_Get_Url (File_Get_Url);
+
+        Self.Send_Object (Message);
+    end Send_Get_Url;
 
     procedure Send_Message (Self : in out Session;
                             To : Universal_String;

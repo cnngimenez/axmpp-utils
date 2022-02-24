@@ -43,6 +43,9 @@ package Event_Sessions is
                             Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Wide_Wide_String);
+    procedure Send_Get_Url (Self : in out Session;
+                            File_Get_Url : Universal_String;
+                            To_JID : Universal_String);
 
     procedure Set_To_JID (Self : in out Session; JID : Universal_String);
     procedure Set_Config (Self : in out Session; Config : Config_Type);
