@@ -193,7 +193,9 @@ package body Event_Console.Commands is
             Key := Line.Head (Separator_Position - 1);
             Element := Line.Tail_From (Separator_Position + 1);
 
-            Include (Self.Arguments, Key, Element);
+            if not Key.Is_Empty then
+                Include (Self.Arguments, Key, Element);
+            end if;
         end Insert_Oneline_Argument;
 
         Lf : constant Wide_Wide_Character :=
