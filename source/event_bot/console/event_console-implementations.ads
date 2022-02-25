@@ -40,7 +40,8 @@ package Event_Console.Implementations is
        Handler : not null Event_Handlers.Event_Handler_Access;
        Output_Pipe : in out Pipe_Manager.Pipe_Type;
        Jid_To : Universal_String;
-       Path : Universal_String);
+       Path : Universal_String;
+       Mime : Universal_String);
     --  Send a file to the given Jid_To XMPP account. Path is the file path.
     --  If the file does not exists, do nothing.
     --

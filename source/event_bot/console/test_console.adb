@@ -44,6 +44,7 @@ begin
 
         Put_Line ("--  Parsing command.");
         Current_Command.Initialize (Command_String);
+        Put_Line ("--  Parsed:");
         Put_Line (Current_Command.To_Wide_Wide_String);
 
         exit when Current_Command.Is_Name (Event_Console.Commands.Bot_End);

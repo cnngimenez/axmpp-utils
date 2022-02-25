@@ -146,15 +146,20 @@ package body Event_Handlers is
         --  Put_URL : constant Universal_String := IQ_Upload.Get_Put_URL;
         --  Get_Url : constant Universal_String := IQ_Upload.Get_Put_URL;
     begin
+        Put_Line ("IQ_Upload received");
         if Self.Upload_Files.Is_Empty then
             return;
         end if;
 
         Upload_Data := Self.Upload_Files.First_Element;
 
+        Put_Line ("Uploading file to "
+                    & To_Wide_Wide_String (IQ_Upload.Get_Put_URL));
         HTTP_Uploader.Upload_File (IQ_Upload.Get_Put_URL,
                                    Upload_Data.File_Data.Get_Filepath,
                                    Upload_Data.File_Data.Get_Content_Type);
+        Put_Line ("Sending the Get URL to: "
+                    & To_Wide_Wide_String (Upload_Data.Jid_To));
         Self.Session.Send_Get_Url (IQ_Upload.Get_Get_URL,
                                    Upload_Data.Jid_To);
         Self.Upload_Files.Delete_First;

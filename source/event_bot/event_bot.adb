@@ -128,8 +128,9 @@ begin
         Ada.Wide_Wide_Text_IO.Put_Line
           ("Input pipe> " & To_Wide_Wide_String (Command_String));
 
-        Put_Line ("Processing command...");
+        Put ("Processing command...");
         Current_Command.Initialize (Command_String);
+        Put_Line ("Processed");
         Ada.Wide_Wide_Text_IO.Put_Line
           ("Current command:" & Current_Command.To_Wide_Wide_String);
         if Dry_Run then

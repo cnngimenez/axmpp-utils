@@ -19,6 +19,9 @@
 
 -------------------------------------------------------------------------
 
+with Ada.Wide_Wide_Text_IO;
+use Ada.Wide_Wide_Text_IO;
+
 with XMPP.Objects;
 pragma Warnings (Off, XMPP.Objects);
 with XMPP.Messages;
@@ -79,6 +82,7 @@ package body Event_Sessions is
                                       File_Data : File_Information) is
         Request : XMPP.IQ_Requests.XMPP_IQ_Request;
     begin
+        Put ("Sending File Upload IQ request");
         Request.Set_To (To_Universal_String ("upload.") & Self.Config.Host);
         Request.Set_From (Self.Config.JID);
         Request.Set_Filename (File_Data.Get_Name);
@@ -86,6 +90,7 @@ package body Event_Sessions is
         Request.Set_Content_Type (File_Data.Get_Content_Type);
 
         Self.Send_Object (Request);
+        Put_Line ("File Upload IQ request sent.");
     end Send_Upload_IQ_Request;
 
     procedure Set_Config (Self : in out Session; Config : Config_Type) is

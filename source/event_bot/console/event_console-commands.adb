@@ -31,8 +31,14 @@ package body Event_Console.Commands is
 
     function Get_Argument (Self : Command; Name : Wide_Wide_String)
                           return Universal_String is
+        Name_String : constant Universal_String :=
+          To_Universal_String (Name);
     begin
-        return Self.Arguments.Element (To_Universal_String (Name));
+        if Self.Arguments.Contains (Name_String) then
+            return Self.Arguments.Element (Name_String);
+        else
+            return Empty_Universal_String;
+        end if;
     end Get_Argument;
 
     function Get_Argument_Count (Self : Command) return Natural is
@@ -54,7 +60,7 @@ package body Event_Console.Commands is
 
     function Get_Data_Argument (Self : Command) return Universal_String is
     begin
-        return Self.Arguments.Element (To_Universal_String ("data"));
+        return Self.Get_Argument ("data");
     end Get_Data_Argument;
 
     function Get_Name (Self : Command) return Name_Type is
@@ -250,7 +256,8 @@ package body Event_Console.Commands is
         elsif Self.Get_Name = Send_File then
             Send_File (Session, Handler, Output_Pipe,
                        Self.Get_Argument ("to"),
-                       Self.Get_Argument ("file"));
+                       Self.Get_Argument ("file"),
+                       Self.Get_Argument ("mime"));
         end if;
     end Run;
 
