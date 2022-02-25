@@ -27,7 +27,7 @@ with Ada.Streams.Stream_IO;
 with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 with Ada.Strings;
-with Ada.Strings.Fixed;
+--  with Ada.Strings.Fixed;
 
 with AWS.Client;
 with AWS.Response;
@@ -84,6 +84,8 @@ package body HTTP_Uploader is
         procedure Check_Certificate
           (Certificate : AWS.Net.SSL.Certificate.Object);
         --  procedure Show_Progress (Total, Sent : Stream_Element_Offset);
+        function Read_File (Path : String) return Stream_Element_Array;
+        procedure Show_Stream (Sea : Stream_Element_Array);
 
         procedure Check_Certificate
           (Certificate : AWS.Net.SSL.Certificate.Object) is
@@ -106,6 +108,25 @@ package body HTTP_Uploader is
             Put_Line ("--");
         end Check_Certificate;
 
+        function Read_File (Path : String) return Stream_Element_Array is
+            use Ada.Streams.Stream_IO;
+
+            Filesize : Stream_Element_Offset :=
+              Stream_Element_Offset (Ada.Directories.Size (Path));
+            Stream_Array : Stream_Element_Array (1 .. Filesize);
+            File : Stream_IO.File_Type;
+        begin
+            Put_Line ("Path: " & Path);
+            Stream_IO.Open (File, In_File, Path);
+            Stream_IO.Read (File, Stream_Array, Filesize);
+            Put_Line ("Stream offset: " & Filesize'Image);
+            --  Put_Line ("Stream last: " & Stream_Array'Last'Image);
+            --  Show_Stream (Stream_Array);
+            Close (File);
+
+            return Stream_Array;
+        end Read_File;
+
         --  procedure Show_Progress (Total, Sent : Stream_Element_Offset) is
         --  begin
         --      Put_Line ("Uploading " & Sent'Image & " of " & Total'Image);
@@ -125,17 +146,7 @@ package body HTTP_Uploader is
         Rdata : Response.Data;
         Header_List : Client.Header_List;
 
-        use Ada.Streams.Stream_IO;
-        Filesize : constant Stream_Element_Offset :=
-          Stream_Element_Offset (Ada.Directories.Size (Path));
-        Stream_Array : Stream_Element_Array (1 .. Filesize);
-        Stream_Offset : Stream_Element_Offset;
-        File : Stream_IO.File_Type;
     begin
-        Put_Line ("Path: " & Path);
-        Stream_IO.Open (File, In_File, Path);
-        Stream_IO.Read (File, Stream_Array, Stream_Offset);
-        Put_Line ("Stream offset: " & Stream_Offset'Image);
 
         Put_Line ("Uploading to " & Put_Url
                     & "(" & Mime_Type & ")");
@@ -143,25 +154,32 @@ package body HTTP_Uploader is
         AWS.Containers.Tables.Add
           (AWS.Containers.Tables.Table_Type (Header_List),
            "Content-Type", Mime_Type);
-        AWS.Containers.Tables.Add
-          (AWS.Containers.Tables.Table_Type (Header_List),
-           "Content-Length",
-           Ada.Strings.Fixed.Trim (Filesize'Image, Ada.Strings.Both));
+        --  AWS.Containers.Tables.Add
+        --    (AWS.Containers.Tables.Table_Type (Header_List),
+        --     "Content-Length",
+        --     Ada.Strings.Fixed.Trim (Filesize'Image, Ada.Strings.Both));
 
         Client.Create (Connection => Connection,
-                       Host => Put_Url);
+                       Host => Put_Url,
+                       Persistent => False);
         --  Client.Upload (Connection => Connection,
         --                 Result => Rdata,
         --                 Filename => Path,
         --                 URI => Put_Url,
-        --                 Headers => Header_List,
-        --                 Progress => Show_Progress'Access);
+        --                 Headers => Header_List);
+        --  --  Progress => Show_Progress'Access);
         Client.Put (Connection => Connection,
                     Result => Rdata,
                     --  Data => Get_File_Data (Path),
-                    Data => Stream_Array,
-                    --  URI => Put_Url,
+                    Data => Read_File (Path),
+                    URI => Put_Url,
                     Headers => Header_List);
+
+        --  --  Non Keep-Alive (No Connection instance).
+        --  Rdata := Client.Put (Data => Get_File_Data (Path),
+        --                       --  Data => Stream_Array,
+        --                       URL => Put_Url,
+        --                       Headers => Header_List);
 
         Put_Line ("Status code: " &
                     Response.Status_Code (Rdata)'Image);
@@ -175,11 +193,12 @@ package body HTTP_Uploader is
         Client.Close (Connection);
 
         --  Show_Stream (Stream_Array);
-        Close (File);
     exception
     when Errors : others =>
         Put_Line ("Error in HTTP_Upload:");
         Put_Line (Exception_Information (Errors));
+        Put_Line ("Attempting to close connection...");
+        Client.Close (Connection);
         raise;
     end Upload_File;
 
