@@ -102,7 +102,7 @@ Example:
   end command
 #+END_SRC
 
-*** TODO Send file
+*** Send file
 Send a file to a single user through HTTP Upload.
 
 Example:
@@ -110,10 +110,11 @@ Example:
   send file
   to=romeo@montesque.lit
   file=~/myfile.png
+  mime=image/png
   end command
 #+END_SRC
 
-*** TODO Send presence
+*** Send presence
 Send presences changes. Presences like busy, free, chatty, and simmilar ones.
 
 Presence is defined at [[https://xmpp.org/rfcs/rfc6121.html#presence-syntax][RFC6121 Presence Syntax]].
@@ -171,3 +172,6 @@ Example:
   bot is connected
   end command
 #+END_SRC
+
+* Add a new command
+See commit 6674720 for an example.
