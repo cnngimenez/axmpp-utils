@@ -253,6 +253,12 @@ package body Event_Console.Commands is
             Send_Message (Session,
                           Self.Get_Argument ("to"),
                           Self.Get_Data_Argument);
+        elsif Self.Get_Name = Send_Presence then
+            Send_Presence (Session,
+                           Self.Get_Argument ("to"),
+                           Self.Get_Argument ("show"),
+                           Self.Get_Argument ("status"),
+                           Self.Get_Argument ("priority"));
         elsif Self.Get_Name = Send_File then
             Send_File (Session, Handler, Output_Pipe,
                        Self.Get_Argument ("to"),

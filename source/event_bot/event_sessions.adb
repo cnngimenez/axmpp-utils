@@ -27,6 +27,7 @@ pragma Warnings (Off, XMPP.Objects);
 with XMPP.Messages;
 with XMPP.Messages.XMPP_File_Messages;
 with XMPP.IQ_Requests;
+with XMPP.Presences;
 
 package body Event_Sessions is
 
@@ -77,6 +78,37 @@ package body Event_Sessions is
     begin
         Send_Message (Self, To_Universal_String (Text));
     end Send_Message;
+
+    procedure Send_Presence
+      (Self : in out Session;
+       To : Universal_String := Empty_Universal_String;
+       --  Pres_Type : XMPP.Presence_Type := Unavailable;
+       Show : XMPP.Show_Kind := XMPP.Online;
+       Status : Universal_String := Empty_Universal_String;
+       Priority : XMPP.Priority_Type := 0) is
+        P : XMPP.Presences.XMPP_Presence;
+        Complete_JID : Universal_String;
+    begin
+        Complete_JID := Self.Config.JID;
+        Complete_JID.Append ("/");
+        Complete_JID.Append (Self.Config.Resource_Name);
+
+        Put_Line ("Setting presence...");
+
+        if not To.Is_Empty then
+            P.Set_To (To);
+        end if;
+        P.Set_Show (Show);
+        P.Set_From (Complete_JID);
+        if not Status.Is_Empty then
+            P.Set_Status (Status);
+        end if;
+        P.Set_Priority (Priority);
+        --  Presence type not yet supported...
+        --  P.Set_Type (Pres_Type);
+
+        Self.Send_Object (P);
+    end Send_Presence;
 
     procedure Send_Upload_IQ_Request (Self : in out Session;
                                       File_Data : File_Information) is

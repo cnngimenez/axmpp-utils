@@ -27,6 +27,7 @@ use Configs;
 with League.Strings;
 use League.Strings;
 with XMPP.Sessions;
+with XMPP;
 
 package Event_Sessions is
 
@@ -43,6 +44,13 @@ package Event_Sessions is
                             Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Universal_String);
     procedure Send_Message (Self : in out Session; Text : Wide_Wide_String);
+    procedure Send_Presence
+      (Self : in out Session;
+       To : Universal_String := Empty_Universal_String;
+       --  Pres_Type : XMPP.Presence_Type := Unavailable;
+       Show : XMPP.Show_Kind := XMPP.Online;
+       Status : Universal_String := Empty_Universal_String;
+       Priority : XMPP.Priority_Type := 0);
     procedure Send_Get_Url (Self : in out Session;
                             File_Get_Url : Universal_String;
                             To_JID : Universal_String);

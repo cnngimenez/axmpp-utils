@@ -35,6 +35,12 @@ package Event_Console.Implementations is
     procedure Send_Message (Session : not null Event_Sessions.Session_Access;
                             Jid_To : Universal_String;
                             Message : Universal_String);
+    procedure Send_Presence
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String := Empty_Universal_String;
+       Show : Universal_String := Empty_Universal_String;
+       Status : Universal_String := Empty_Universal_String;
+       Priority : Universal_String := Empty_Universal_String);
     procedure Send_File
       (Session : not null Event_Sessions.Session_Access;
        Handler : not null Event_Handlers.Event_Handler_Access;

@@ -20,6 +20,7 @@
 -------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded;
+with XMPP;
 with Files;
 use Files;
 
@@ -80,6 +81,67 @@ package body Event_Console.Implementations is
             Session.Send_Message (Jid_To, Message);
         end if;
     end Send_Message;
+
+    procedure Send_Presence
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String := Empty_Universal_String;
+       Show : Universal_String := Empty_Universal_String;
+       Status : Universal_String := Empty_Universal_String;
+       Priority : Universal_String := Empty_Universal_String) is
+
+        function Map_String_To_Show_Kind (S : Universal_String)
+                                         return XMPP.Show_Kind;
+        function Map_String_To_Number (S : Universal_String)
+                                      return XMPP.Priority_Type;
+
+        function Map_String_To_Number (S : Universal_String)
+                                      return XMPP.Priority_Type is
+        begin
+            return XMPP.Priority_Type'Wide_Wide_Value
+              (To_Wide_Wide_String (S));
+        end Map_String_To_Number;
+
+        function Map_String_To_Show_Kind (S : Universal_String)
+                                         return XMPP.Show_Kind is
+            Online_String : constant Universal_String :=
+              To_Universal_String ("online");
+            Xa_String : constant Universal_String :=
+              To_Universal_String ("xa");
+            Away_String : constant Universal_String :=
+              To_Universal_String ("away");
+            Chat_String : constant Universal_String :=
+              To_Universal_String ("chat");
+            Dnd_String : constant Universal_String :=
+              To_Universal_String ("dnd");
+        begin
+            if S.Is_Empty then
+                return XMPP.Online;
+            elsif S = Online_String then
+                return XMPP.Online;
+            elsif S = Xa_String then
+                return XMPP.XA;
+            elsif S = Away_String then
+                return XMPP.Away;
+            elsif S = Chat_String then
+                return XMPP.Chat;
+            elsif S = Dnd_String then
+                return XMPP.DND;
+            else
+                return XMPP.Online;
+            end if;
+        end Map_String_To_Show_Kind;
+
+        Show_Data : XMPP.Show_Kind;
+        Priority_Data : XMPP.Priority_Type;
+    begin
+        Show_Data := Map_String_To_Show_Kind (Show);
+        Priority_Data := Map_String_To_Number (Priority);
+
+        Session.Send_Presence (To => Jid_To,
+                               Show => Show_Data,
+                               Status => Status,
+                               Priority => Priority_Data);
+    end Send_Presence;
 
     function To_Path_String (S : Universal_String) return String is
         use Ada.Strings.Unbounded;
