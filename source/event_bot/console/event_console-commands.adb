@@ -264,6 +264,12 @@ package body Event_Console.Commands is
                        Self.Get_Argument ("to"),
                        Self.Get_Argument ("file"),
                        Self.Get_Argument ("mime"));
+        elsif Self.Get_Name = Send_Pubsub_Support_Request then
+            Send_Pubsub_Support_Request (Session,
+                                         Self.Get_Argument ("to"));
+        elsif Self.Get_Name = Send_Pubsub_Node_List_Request then
+            Send_Pubsub_Node_List_Request (Session,
+                                           Self.Get_Argument ("to"));
         end if;
     end Run;
 

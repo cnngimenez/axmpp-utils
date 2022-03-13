@@ -63,4 +63,15 @@ package Event_Console.Implementations is
     --  3. Upload the HTTP File. Once finished, then:
     --  4. Send the GET URL of the slot to the Jid_To account.
 
+    --  Pubsub implementations
+    procedure Send_Pubsub_Support_Request
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String);
+    --  Ask the server if it support pubsub requests.
+
+    procedure Send_Pubsub_Node_List_Request
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String);
+    --  Ask the server for a list of pubsub nodes.
+
 end Event_Console.Implementations;

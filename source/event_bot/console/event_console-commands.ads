@@ -38,6 +38,9 @@ package Event_Console.Commands is
     type Name_Type is (Send_Message,
                        Send_File,
                        Send_Presence,
+                       --  Pubsub
+                       Send_Pubsub_Support_Request,
+                       Send_Pubsub_Node_List_Request,
                        --  Bot commands
                        Bot_Is_Connected,
                        Bot_End,

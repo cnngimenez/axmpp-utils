@@ -143,6 +143,20 @@ package body Event_Console.Implementations is
                                Priority => Priority_Data);
     end Send_Presence;
 
+    procedure Send_Pubsub_Node_List_Request
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String) is
+    begin
+        Session.Send_Pubsub_Node_List_Request (To => Jid_To);
+    end Send_Pubsub_Node_List_Request;
+
+    procedure Send_Pubsub_Support_Request
+      (Session : not null Event_Sessions.Session_Access;
+       Jid_To : Universal_String) is
+    begin
+        Session.Send_Pubsub_Support_Request (To => Jid_To);
+    end Send_Pubsub_Support_Request;
+
     function To_Path_String (S : Universal_String) return String is
         use Ada.Strings.Unbounded;
 
