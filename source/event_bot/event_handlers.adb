@@ -267,9 +267,9 @@ package body Event_Handlers is
 
             --  After session successfully established,
             --  sending presence
-            Self.Set_Presence;
+            --  Self.Set_Presence;
 
-            Put_Line ("Sending Hello message...");
+            --  Put_Line ("Sending Hello message...");
             --  Message.Set_Type (XMPP.Chat);
             --  Message.Set_Body (Hello_Text);
             --  Message.Set_To (Self.To_JID);
@@ -278,7 +278,7 @@ package body Event_Handlers is
             --  Put_Line (Self.To_JID.To_Wide_Wide_String);
             --  Put_Line (Self.Config.JID.To_Wide_Wide_String);
 
-            Self.Session.Send_Message (Hello_Text);
+            --  Self.Session.Send_Message (Hello_Text);
 
             --  Self.Session.Close;
         end if;
