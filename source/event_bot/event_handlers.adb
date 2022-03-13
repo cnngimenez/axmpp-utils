@@ -22,6 +22,7 @@
 with Ada.Task_Identification;
 with Ada.Wide_Wide_Text_IO;
 use Ada.Wide_Wide_Text_IO;
+with Ada.Characters.Wide_Wide_Latin_1;
 
 with Event_Sessions;
 
@@ -165,38 +166,40 @@ package body Event_Handlers is
         Self.Upload_Files.Delete_First;
     end IQ_Upload;
 
-    overriding procedure Message
-      (Self : in out Event_Handler;
-       Msg : XMPP.Messages.XMPP_Message'Class) is
-        --  pragma Unreferenced (Self);
-        --  pragma Unreferenced (Msg);
+    overriding procedure Message (Self : in out Event_Handler;
+                                  Msg : XMPP.Messages.XMPP_Message'Class) is
         Bye_Text : constant Universal_String := +"Bye";
-        Slash_Position : Natural;
+        --  Slash_Position : Natural;
         From : Universal_String;
     begin
         Put_Line ("Message received:");
-        Put_Line (To_Wide_Wide_String (Msg.Get_From)
-                    & ": '" & To_Wide_Wide_String (Msg.Get_Body) & "'");
+        Put_Line (To_Wide_Wide_String (Msg.Get_From));
+        --  & ": '" & To_Wide_Wide_String (Msg.Get_Body) & "'");
 
-        Slash_Position := Msg.Get_From.Index ("/");
-        if Slash_Position > 0 then
-            From := Msg.Get_From.Slice (1, Slash_Position - 1);
-        else
-            From := Msg.Get_From;
-        end if;
+        --  Slash_Position := Msg.Get_From.Index ("/");
+        --  if Slash_Position > 0 then
+        --      From := Msg.Get_From.Slice (1, Slash_Position - 1);
+        --  else
+        --      From := Msg.Get_From;
+        --  end if;
 
-        Put_Line (To_Wide_Wide_String (From));
+        --  Put_Line (To_Wide_Wide_String (From));
 
         if Self.Output_Pipe_Set and then not Msg.Get_Body.Is_Empty then
-            Self.Output_Pipe.Write_Message (Msg.Get_From
-                                              & (+":")
-                                              & Msg.Get_Body);
-            Put_Line ("Message delivered to output pipe");
+            Self.Output_Pipe.Write_Message
+              ("<!--  > Message: "
+                 & " from: """ & To_Wide_Wide_String (Msg.Get_From) & """"
+                 & " to: """ & To_Wide_Wide_String (Msg.Get_To) & """"
+                 & " id: """ & To_Wide_Wide_String (Msg.Get_Id) & """"
+                 & " type: " & Msg.Get_Type'Wide_Wide_Image
+                 & " subject: """ & To_Wide_Wide_String (Msg.Get_Subject)
+                 & """"
+                 & " body: """ & To_Wide_Wide_String (Msg.Get_Body) & """"
+                 & " chat-state: " & Msg.Get_Chat_State'Wide_Wide_Image
+                 & " -->");
         end if;
 
-        if From = Self.To_JID and then
-          Msg.Get_Body = Bye_Text
-        then
+        if From = Self.To_JID and then Msg.Get_Body = Bye_Text then
             Self.Session.Send_Message ("Alright! Bye!");
             Self.Session.Close;
         end if;
@@ -208,17 +211,61 @@ package body Event_Handlers is
     overriding procedure Presence
       (Self : in out Event_Handler;
        Data : XMPP.Presences.XMPP_Presence'Class) is
-        pragma Unreferenced (Self);
 
     begin
         Ada.Wide_Wide_Text_IO.Put_Line ("Presence Arrived: ");
-        Ada.Wide_Wide_Text_IO.Put_Line
-          ("User "
-             & Data.Get_From.To_Wide_Wide_String
-             & " is "
-             & XMPP.Show_Kind'Wide_Wide_Image (Data.Get_Show)
-             & " (" & Data.Get_Status.To_Wide_Wide_String & ")");
+        --  Ada.Wide_Wide_Text_IO.Put_Line
+        --    ("User "
+        --       & Data.Get_From.To_Wide_Wide_String
+        --       & " is "
+        --       & XMPP.Show_Kind'Wide_Wide_Image (Data.Get_Show)
+        --       & " (" & Data.Get_Status.To_Wide_Wide_String & ")");
+
+        Self.Output_Pipe.Write_Message
+          (Wide_Wide_String'("<!--  > Presence: ")
+             & " from: """ & To_Wide_Wide_String (Data.Get_From) & """"
+             & " to: """ & To_Wide_Wide_String (Data.Get_To) & """"
+             & " type: " & Data.Get_Type'Wide_Wide_Image
+             & " show: " & Data.Get_Show'Wide_Wide_Image
+             & " priority: " & Data.Get_Priority'Wide_Wide_Image
+             & " status:  """ & To_Wide_Wide_String (Data.Get_Status) & """"
+             & "-->");
     end Presence;
+
+    overriding procedure Pubsub_Discover_Features
+      (Self : in out Event_Handler;
+       Supported : Axmpp.Modules.Pubsubs.Pubsub_Support_Type;
+       Pubsub_Module : Axmpp.Modules.Pubsubs.Pubsub_Module) is
+    begin
+        Self.Output_Pipe.Write_Message
+          (Wide_Wide_String'("<!--  > Pubsub discovery response: ")
+             & Supported'Wide_Wide_Image
+             & "-->");
+    end Pubsub_Discover_Features;
+
+    overriding procedure Pubsub_Discover_Items
+      (Self : in out Event_Handler;
+       Pubsub_Nodes : XMPP.XMPP_Pubsub.Node_Vectors.Node_Vector;
+       Pubsub_Module : Axmpp.Modules.Pubsubs.Pubsub_Module) is
+        LF : constant Wide_Wide_Character :=
+          Ada.Characters.Wide_Wide_Latin_1.LF;
+    begin
+        Self.Output_Pipe.Write_Message
+          (Wide_Wide_String'
+             ("<!--  > Pubsub discovery items, node list received:"));
+
+        for I of Pubsub_Nodes loop
+            Self.Output_Pipe.Write_Message
+              (Wide_Wide_String'("JID: """)
+                 & To_Wide_Wide_String (I.Get_JID) & """"
+                 & "Node: """  & To_Wide_Wide_String (I.Get_Node) & """"
+                 & "Name: """ & To_Wide_Wide_String (I.Get_Name) & """"
+                 & LF);
+        end loop;
+
+        Self.Output_Pipe.Write_Message (Wide_Wide_String'("-->"));
+
+    end Pubsub_Discover_Items;
 
     procedure Put_Roster (Iq : XMPP_Roster) is
         use XMPP.Roster_Items;
@@ -258,7 +305,7 @@ package body Event_Handlers is
       (Self   : in out Event_Handler;
        Status : XMPP.Session_State) is
 
-        Hello_Text : constant Wide_Wide_String := "Hello! I'm connected!";
+        --  Hello_Text : constant Wide_Wide_String := "Hello! I'm connected!";
 
     begin
         Put_Line ("Session_state:");
@@ -268,15 +315,7 @@ package body Event_Handlers is
             --  After session successfully established,
             --  sending presence
             --  Self.Set_Presence;
-
-            --  Put_Line ("Sending Hello message...");
-            --  Message.Set_Type (XMPP.Chat);
-            --  Message.Set_Body (Hello_Text);
-            --  Message.Set_To (Self.To_JID);
-            --  Message.Set_From (Self.Config.JID);
-            --  Put_Line (Self.Text.To_Wide_Wide_String);
-            --  Put_Line (Self.To_JID.To_Wide_Wide_String);
-            --  Put_Line (Self.Config.JID.To_Wide_Wide_String);
+            Self.Session.Send_Presence;
 
             --  Self.Session.Send_Message (Hello_Text);
 

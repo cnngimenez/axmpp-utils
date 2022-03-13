@@ -32,6 +32,8 @@ with XMPP.IQS;
 with XMPP.Messages;
 with XMPP.Rosters;
 with XMPP.IQ_Uploads;
+with Axmpp.Modules.Pubsubs;
+with XMPP.XMPP_Pubsub.Node_Vectors;
 
 with Configs;
 use Configs;
@@ -103,6 +105,18 @@ package Event_Handlers is
 
     overriding procedure Error
       (Self : in out Event_Handler);
+
+    --  Pubsub managmenent
+
+    overriding procedure Pubsub_Discover_Features
+      (Self : in out Event_Handler;
+       Supported : Axmpp.Modules.Pubsubs.Pubsub_Support_Type;
+       Pubsub_Module : Axmpp.Modules.Pubsubs.Pubsub_Module);
+
+    overriding procedure Pubsub_Discover_Items
+      (Self : in out Event_Handler;
+       Pubsub_Nodes : XMPP.XMPP_Pubsub.Node_Vectors.Node_Vector;
+       Pubsub_Module : Axmpp.Modules.Pubsubs.Pubsub_Module);
 
     procedure Set_Session_Object
       (Self   : in out Event_Handler;
